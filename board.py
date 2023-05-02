@@ -85,7 +85,7 @@ class DiceRollView(View):
         else:
             await interaction.response.send_message('User not found in the sheet.')
 
-@bot.command(name='월드')
+@bot.command(name='보드')
 async def world(ctx):
     sheet7, rows = await get_sheet7()  
     user_cell = await find_user(ctx.author, sheet7)
