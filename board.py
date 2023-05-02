@@ -63,3 +63,41 @@ async def find_user(username, sheet):
     except gspread.exceptions.APIError as e:
         print(f'find_user error: {e}')
     return cell
+  
+class DiceRollView(View):
+    def __init__(self, ctx, sheet):
+        super().__init__()
+        self.ctx = ctx
+        self.sheet = sheet
+
+    @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
+    async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
+        cell = await find_user(self.ctx.author.name, self.sheet)
+        if cell:
+            dice_count = int(await self.sheet.get_value(f'B{cell.row}'))
+            if dice_count > 0:
+                dice_roll = random.randint(1, 6)
+                await interaction.response.send_message(f'You rolled a {dice_roll}!')
+                await self.sheet.update_cell(cell.row, 2, dice_count - 1)
+            else:
+                await interaction.response.send_message('There are no dice to roll.')
+        else:
+            await interaction.response.send_message('User not found in the sheet.')
+
+@bot.command(name='월드')
+async def world(ctx):
+    sheet, rows = await get_sheet7()
+    user_cell = await find_user(ctx.author.name, sheet)
+    if not user_cell:
+        await ctx.send("User not found in the sheet.")
+        return
+
+    cities = rows[1:26]
+
+    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
+    for index, city in enumerate(cities, start=1):
+        embed.add_field(name=f"Field {index}", value=city[0], inline=True)
+
+    view = DiceRollView(ctx, sheet)
+    await ctx.send(embed=embed, view=view)
+
