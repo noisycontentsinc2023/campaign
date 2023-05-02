@@ -69,13 +69,13 @@ class DiceRollView(View):
     def __init__(self, ctx, sheet7):
         super().__init__()
         self.ctx = ctx
-        self.sheet7 = sheet7
+        self.sheet7 = sheet7 
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
         cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
-            dice_count = int(await self.sheet7.get_value(f'B{cell.row}'))
+            dice_count = int(await self.sheet7.get(f'B{cell.row}'))
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
                 await interaction.response.send_message(f'You rolled a {dice_roll}!')
@@ -87,7 +87,7 @@ class DiceRollView(View):
 
 @bot.command(name='보드')
 async def world(ctx):
-    sheet7, rows = await get_sheet7()  
+    sheet7, rows = await get_sheet7()
     user_cell = await find_user(ctx.author, sheet7)
     if not user_cell:
         await ctx.send("User not found in the sheet.")
