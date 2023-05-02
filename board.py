@@ -54,10 +54,11 @@ async def get_sheet7():
     rows = await sheet7.get_all_values()
     return sheet7, rows
   
-async def find_user(username, sheet):
+async def find_user(user, sheet):
     cell = None
     try:
-        cells = await sheet.findall(username)
+        username_with_discriminator = f'{user.name}#{user.discriminator}'
+        cells = await sheet.findall(username_with_discriminator)
         if cells:
             cell = cells[0]
     except gspread.exceptions.APIError as e:
@@ -87,7 +88,7 @@ class DiceRollView(View):
 @bot.command(name='월드')
 async def world(ctx):
     sheet, rows = await get_sheet7()
-    user_cell = await find_user(ctx.author.name, sheet)
+    user_cell = await find_user(ctx.author, sheet)
     if not user_cell:
         await ctx.send("User not found in the sheet.")
         return
