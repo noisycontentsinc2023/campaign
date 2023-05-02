@@ -45,3 +45,21 @@ creds_info = {
 }
 credentials = Credentials.from_service_account_info(creds_info, scopes=scope)
 aio_creds = credentials
+
+async def get_sheet7():
+    client_manager = gspread_asyncio.AsyncioGspreadClientManager(lambda: aio_creds)
+    client = await client_manager.authorize()
+    spreadsheet = await client.open('서버기록')
+    sheet7 = await spreadsheet.worksheet('월드와이드')
+    rows = await sheet7.get_all_values()
+    return sheet7, rows
+  
+async def find_user(username, sheet):
+    cell = None
+    try:
+        cells = await sheet.findall(username)
+        if cells:
+            cell = cells[0]
+    except gspread.exceptions.APIError as e:
+        print(f'find_user error: {e}')
+    return cell
