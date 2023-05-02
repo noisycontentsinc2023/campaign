@@ -54,14 +54,14 @@ async def get_sheet7():
     rows = await sheet7.get_all_values()
     return sheet7, rows
   
-async def find_user(user, sheet):
+async def find_user(user, sheet7):
     cell = None
     try:
         username_with_discriminator = f'{user.name}#{user.discriminator}'
-        cells = await sheet.findall(username_with_discriminator)
+        cells = await sheet7.findall(username_with_discriminator)
         if cells:
             cell = cells[0]
-    except gspread.exceptions.APIError as e:
+    except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
         print(f'find_user error: {e}')
     return cell
   
@@ -69,17 +69,17 @@ class DiceRollView(View):
     def __init__(self, ctx, sheet):
         super().__init__()
         self.ctx = ctx
-        self.sheet = sheet
+        self.sheet7 = sheet7
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
-        cell = await find_user(self.ctx.author.name, self.sheet)
+        cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
-            dice_count = int(await self.sheet.get_value(f'B{cell.row}'))
+            dice_count = int(await self.sheet7.get_value(f'B{cell.row}'))
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
                 await interaction.response.send_message(f'You rolled a {dice_roll}!')
-                await self.sheet.update_cell(cell.row, 2, dice_count - 1)
+                await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
             else:
                 await interaction.response.send_message('There are no dice to roll.')
         else:
@@ -88,7 +88,7 @@ class DiceRollView(View):
 @bot.command(name='월드')
 async def world(ctx):
     sheet, rows = await get_sheet7()
-    user_cell = await find_user(ctx.author, sheet)
+    user_cell = await find_user(ctx.author, sheet7)
     if not user_cell:
         await ctx.send("User not found in the sheet.")
         return
@@ -99,7 +99,7 @@ async def world(ctx):
     for index, city in enumerate(cities, start=1):
         embed.add_field(name=f"Field {index}", value=city[0], inline=True)
 
-    view = DiceRollView(ctx, sheet)
+    view = DiceRollView(ctx, sheet7)
     await ctx.send(embed=embed, view=view)
 
 bot.run(TOKEN)
