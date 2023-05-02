@@ -75,8 +75,8 @@ class DiceRollView(View):
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
         cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
-            value_range = await self.sheet7.get(f'B{cell.row}')
-            dice_count = int(value_range['values'][0][0])
+            cell_value = await self.sheet7.acell(f'B{cell.row}')
+            dice_count = int(cell_value['value'])
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
                 await interaction.response.send_message(f'You rolled a {dice_roll}!')
