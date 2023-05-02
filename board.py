@@ -79,12 +79,12 @@ class DiceRollView(View):
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                await interaction.response.send_message(f'You rolled a {dice_roll}!', ephemeral=True)  # 수정된 부분
+                await interaction.channel.send(f'You rolled a {dice_roll}!')  # 수정된 부분
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
             else:
-                await interaction.response.send_message('There are no dice to roll.', ephemeral=True)  # 수정된 부분
+                await interaction.channel.send('There are no dice to roll.')  # 수정된 부분
         else:
-            await interaction.response.send_message('User not found in the sheet.', ephemeral=True)  # 수정된 부분
+            await interaction.channel.send('User not found in the sheet.')  # 수정된 부분
             
 @bot.command(name='보드')
 async def world(ctx):
