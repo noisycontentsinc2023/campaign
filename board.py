@@ -101,3 +101,4 @@ async def world(ctx):
     view = DiceRollView(ctx, sheet)
     await ctx.send(embed=embed, view=view)
 
+bot.run(TOKEN)
