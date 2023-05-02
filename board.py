@@ -76,7 +76,7 @@ class DiceRollView(View):
         cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
             cell_value = await self.sheet7.acell(f'B{cell.row}')
-            dice_count = int(cell_value['value'])
+            dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
                 await interaction.response.send_message(f'You rolled a {dice_roll}!')
