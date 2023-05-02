@@ -66,7 +66,7 @@ async def find_user(user, sheet7):
     return cell
   
 class DiceRollView(View):
-    def __init__(self, ctx, sheet):
+    def __init__(self, ctx, sheet7):
         super().__init__()
         self.ctx = ctx
         self.sheet7 = sheet7
