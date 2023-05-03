@@ -75,17 +75,12 @@ field_names = [
 
 def create_game_board_embed(ctx, position, cities, field_names):
     embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
-
-    for row in range(5):
-        row_values = []
-        for col in range(5):
-            index = row * 5 + col + 1
-            city = cities[index - 1][0]
-            if index == position:
-                city = f"⚪ {city}"
-            row_values.append(city)
-        embed.add_field(name=f"Row {row + 1}", value="\n".join(row_values), inline=True)
-
+    for index, city in enumerate(cities, start=1):
+        field_name = field_names[index - 1]
+        field_value = f"{city[0]}"
+        if index == position:
+            field_value = f"⚪ {city[0]}"
+        embed.add_field(name=field_name, value=field_value, inline=True)
     return embed
 
 class DiceRollView(View):
