@@ -91,7 +91,8 @@ class DiceRollView(discord.ui.View):
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                current_position = int(await self.sheet7.cell(cell.row, 3).value)
+                current_position_cell = await self.sheet7.cell(cell.row, 3)
+                current_position = int(current_position_cell.value)  # Cast value to int
                 new_position = current_position + dice_roll
                 await self.sheet7.update_cell(cell.row, 3, new_position)
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
