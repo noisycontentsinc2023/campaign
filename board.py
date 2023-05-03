@@ -93,9 +93,6 @@ class DiceRollView(View):
         self.field_names = field_names
         self.message = None
 
-    async def send_initial_message(self, ctx, channel):
-        self.message = await channel.send(embed=create_game_board_embed(ctx, self.position, self.cities, self.field_names), view=self)
-
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
         cell = await find_user(self.ctx.author, self.sheet7)
@@ -110,8 +107,8 @@ class DiceRollView(View):
                 await interaction.response.send_message(f'You rolled a {dice_roll}!', ephemeral=True)
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
                 game_board_embed = create_game_board_embed(self.ctx, self.position, self.cities, self.field_names)
-                self.message = interaction.message  # Add this line to update the message reference
-                await self.message.edit(embed=game_board_embed)
+                await interaction.edit_original_message(embed=game_board_embed)  # Replace this line
+
             else:
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
@@ -129,5 +126,7 @@ async def world(ctx):
     cities = rows[1:26]
     view = DiceRollView(ctx, sheet7, cities, initial_position, field_names)
     await view.send_initial_message(ctx, ctx.channel)
+    embed = create_game_board_embed(ctx, initial_position, cities, field_names)
+    await ctx.send(embed=embed, view=view)
 
 bot.run(TOKEN)
