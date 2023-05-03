@@ -110,7 +110,19 @@ async def world(ctx):
     current_field = 0  # Start at Field 0 (before the first city)
 
     view = DiceRollView(ctx, sheet7, current_field)
-    message = await ctx.send('Check your DM for the result of your roll!', view=view)
     view.message = message
-    
+
+    # Send the game board to the user as a private message
+    cities = ["New York", "Tokyo", "Paris", "London", "Berlin", "Moscow", "Dubai", "Hong Kong", "Seoul", "Barcelona", "Sydney", "Rio de Janeiro", "Mumbai", "Cape Town", "Buenos Aires", "Cairo", "Istanbul", "Bangkok", "Athens", "Rome", "Toronto", "Vancouver", "Los Angeles", "Chicago", "San Francisco"]
+    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
+    for index, city in enumerate(cities):
+        embed.add_field(name=city, value="", inline=True)
+    game_board_message = await ctx.author.send(embed=embed)
+
+    # Delete the original message in the server
+    await message.delete()
+
+    # Update the game board view message to include the private message link
+    view.game_board_message = game_board_message
+    await view.update_board()
 bot.run(TOKEN)
