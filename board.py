@@ -66,17 +66,18 @@ async def find_user(user, sheet7):
     return cell
 
 def create_game_board_embed(position, cities):
-    embed = discord.Embed(title="Roll into the world", description="This is the game board.", color=discord.Color.blue())
+    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
     for index, city in enumerate(cities, start=1):
+        field_name = f"Field {index}"
+        field_value = f"{city[0]}"
         if index == position:
-            embed.add_field(name=f"Field {index}", value=f"{city[0]} :white_circle:", inline=True)
-        else:
-            embed.add_field(name=f"Field {index}", value=city[0], inline=True)
+            field_value = f"⚪ {city[0]}"
+        embed.add_field(name=field_name, value=field_value, inline=True)
     return embed
-  
+
 class DiceRollView(View):
     def __init__(self, ctx, sheet7, cities, position):
-        super().__init__(timeout=None)  # Add timeout=None to prevent the view from expiring
+        super().__init__(timeout=None)
         self.ctx = ctx
         self.sheet7 = sheet7
         self.cities = cities
@@ -100,12 +101,12 @@ class DiceRollView(View):
                 await interaction.response.send_message(f'You rolled a {dice_roll}!', ephemeral=True)
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
                 game_board_embed = create_game_board_embed(self.position, self.cities)
-                new_view = DiceRollView(self.ctx, self.sheet7, self.cities, self.position)  # Create a new DiceRollView instance
-                await self.message.edit(embed=game_board_embed, view=new_view)  # Edit the existing game board message with the new view
+                await self.message.edit(embed=game_board_embed)
             else:
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
             await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
+
 
             
 @bot.command(name='보드')
