@@ -118,7 +118,7 @@ class DiceRollView(discord.ui.View):
         # 게임판 Embed에 Field 추가
         for i in range(25):
             # 현재 위치에는 표시
-            if i == self.current_field - 1:
+            if i == current_field - 1:
                 embed.add_field(name=f":red_square: {board[i]}", value=f":arrow_right: {descriptions[i]}", inline=True)
             else:
                 embed.add_field(name=board[i], value=descriptions[i], inline=True)
@@ -143,7 +143,7 @@ async def world(ctx):
             embed.add_field(name=board[i], value=descriptions[i], inline=True)
 
     view = DiceRollView(sheet7, current_field)
-    game_board_message = await ctx.send(embed=embed, view=view)
+    game_board_message = await ctx.send(embed=get_board_embed(current_field), view=view)
     view.message = game_board_message
 
 bot.run(TOKEN)
