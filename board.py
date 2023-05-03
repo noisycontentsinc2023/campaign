@@ -73,7 +73,8 @@ class DiceRollView(View):
         self.position = 0
 
     async def update_board(self, position):
-        cities = await self.sheet7.col_values(1)[1:25]
+        cities = await self.sheet7.col_values(1)
+        cities = cities[1:25]
 
         embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
         for index, city in enumerate(cities, start=1):
