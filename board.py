@@ -98,7 +98,6 @@ class DiceRollView(discord.ui.View):
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
                 embed = await self.update_embed(new_position)
                 await interaction.message.edit(embed=embed, view=self)
-                await interaction.response.send_message(f'You rolled a {dice_roll} and moved to Field {new_position}!', ephemeral=True)
             else:
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
