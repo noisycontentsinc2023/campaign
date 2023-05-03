@@ -124,6 +124,6 @@ async def world(ctx):
     initial_position = 1
     cities = rows[1:26]
     view = DiceRollView(ctx, sheet7, cities, initial_position, field_names)
-    await view.send_initial_message(ctx, ctx.channel)
+    view.message = await ctx.send(embed=create_game_board_embed(ctx, initial_position, cities, field_names), view=view)
 
 bot.run(TOKEN)
