@@ -64,6 +64,7 @@ async def find_user(user, sheet7):
     except gspread_asyncio.exceptions.APIError as e:
         print(f'find_user error: {e}')
     return cell
+
 # 보드 게임판
 board = ["START", "도쿄", "무인도", "이벤트", "4", "5", "6", "7", "8", "9", "10",
          "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
