@@ -131,9 +131,10 @@ async def world(ctx):
     for i in range(0, 24, 5):
         board_str += '[ ] [ ] [ ] [ ] [ ]\n'
     embed.add_field(name='Board', value=board_str)
+    for index, city in enumerate(cities, start=1):
+        embed.add_field(name=f"Field {index}", value=city, inline=True)
 
     view = DiceRollView(ctx, sheet7)
-    message = await ctx.send(embed=embed, view=view)
-    view.message = message
+    view.message = await ctx.send(embed=embed, view=view)
     
 bot.run(TOKEN)
