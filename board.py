@@ -66,11 +66,10 @@ async def find_user(user, sheet7):
     return cell
   
 class DiceRollView(View):
-    def __init__(self, ctx, sheet7, board_message):
+    def __init__(self, ctx, sheet7):
         super().__init__()
         self.ctx = ctx
         self.sheet7 = sheet7 
-        self.board_message = board_message
         self.position = 0
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
@@ -97,22 +96,23 @@ class DiceRollView(View):
 
     async def update_board(self):
         cities = await self.sheet7.col_values(1)[1:25]
-        board = ['[ ]' for _ in range(24)]
+        board = ['[ ]' for _ in range(25)]
         board[self.position] = '[X]'
-
         board_str = ''
-        for i in range(0, 24, 5):
+        for i in range(0, 25, 5):
             board_str += ' '.join(board[i:i+5]) + '\n'
 
         embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
+        for index, city in enumerate(cities, start=1):
+            embed.add_field(name=f"Field {index}", value=city, inline=True)
         embed.add_field(name='Board', value=board_str)
 
-        await self.board_message.edit(embed=embed)
+        await self.message.edit(embed=embed)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         result = await super().interaction_check(interaction)
         if result:
-            self.board_message = interaction.message
+            self.message = interaction.message
         return result
 
 @bot.command(name='보드')
