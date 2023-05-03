@@ -81,9 +81,9 @@ class DiceRollView(View):
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
                 self.current_field = int(cell_value.value) + dice_roll
-                await self.ctx.author.send(f'You rolled a {dice_roll} and moved to Field {self.current_field}!')  # Private message
+                await self.ctx.author.send(f'You rolled a {dice_roll} and moved to {CITIES[self.current_field]}!')  # Private message
                 await self.sheet7.update_cell(cell.row, 2, self.current_field)
-                await interaction.response.edit_message(content=f'{self.ctx.author.mention} rolled a {dice_roll} and moved to Field {self.current_field}!')  # Update message
+                await interaction.response.edit_message(view=self)
                 await self.update_board()
             else:
                 await self.ctx.send('There are no dice to roll.', view=None)
@@ -91,14 +91,13 @@ class DiceRollView(View):
             await self.ctx.send('User not found in the sheet.', view=None)
 
     async def update_board(self):
-        cities = ["New York", "Tokyo", "Paris", "London", "Berlin", "Moscow", "Dubai", "Hong Kong", "Seoul", "Barcelona", "Sydney", "Rio de Janeiro", "Mumbai", "Cape Town", "Buenos Aires", "Cairo", "Istanbul", "Bangkok", "Athens", "Rome", "Toronto", "Vancouver", "Los Angeles", "Chicago", "San Francisco"]
-
         embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
-        for index, city in enumerate(cities):
+        for index, city in enumerate(CITIES):
             indicator = "⚪" if index == self.current_field else ""
             embed.add_field(name=city, value=indicator, inline=True)
 
         await self.message.edit(embed=embed, view=self)
+
 
 @bot.command(name='보드')
 async def world(ctx):
@@ -108,17 +107,10 @@ async def world(ctx):
         await ctx.send("User not found in the sheet.")
         return
 
-    current_field = 1  # Start at Field 1
-
-    cities = ["New York", "Tokyo", "Paris", "London", "Berlin", "Moscow", "Dubai", "Hong Kong", "Seoul", "Barcelona", "Sydney", "Rio de Janeiro", "Mumbai", "Cape Town", "Buenos Aires", "Cairo", "Istanbul", "Bangkok", "Athens", "Rome", "Toronto", "Vancouver", "Los Angeles", "Chicago", "San Francisco"]
-
-    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
-    for index, city in enumerate(cities, start=1):
-        indicator = "⚪" if index == current_field else ""
-        embed.add_field(name=f"Field {index}", value=f"{city} {indicator}", inline=True)
+    current_field = 0  # Start at Field 0 (before the first city)
 
     view = DiceRollView(ctx, sheet7, current_field)
-    message = await ctx.send(embed=embed, view=view)
+    message = await ctx.send('Check your DM for the result of your roll!', view=view)
     view.message = message
     
 bot.run(TOKEN)
