@@ -64,7 +64,66 @@ async def find_user(user, sheet7):
     except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
         print(f'find_user error: {e}')
     return cell
-  
+
+# 브루마블 게임판
+board = ["START", "도쿄", "무인도", "이벤트", "4", "5", "6", "7", "8", "9", "10", 
+         "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", 
+         "21", "22", "23", "24", "25"]
+
+# 게임판의 각 칸의 설명
+descriptions = ["시작점", "미식의 도시 도쿄! 가장 좋아하는 일본 요리를 일본어로 공유해주세요", "하루 동안 주사위를 굴릴 수 없습니다", "인벤트 버튼을 클릭하세요", "D", "E", "F", "G", "H", "I",
+                "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
+                "T", "U", "V", "W", "X", "Y", "Z"]
+
+
+# 봇이 준비되면 호출되는 이벤트 핸들러 함수
+@bot.event
+async def on_ready():
+    print(f'{bot.user}이(가) 로그인하였습니다!')
+
+# 주사위를 굴려 게임판을 이동하는 함수
+def roll_dice():
+    return random.randint(1, 6)
+
+# 게임판을 임베드 메시지 형태로 반환하는 함수
+def get_board_embed(position):
+    # Embed 객체 생성
+    embed = discord.Embed(title="브루마블 게임판", color=0xFF5733)
+
+    # 게임판 Embed에 Field 추가
+    for i in range(25):
+        # 현재 위치에는 표시
+        if i == position:
+            embed.add_field(name=f":red_square: {board[i]}", value=f":arrow_right: {descriptions[i]}", inline=True)
+        else:
+            embed.add_field(name=board[i], value=descriptions[i], inline=True)
+
+    return embed
+
+# 봇이 명령어를 받으면 호출되는 이벤트 핸들러 함수
+@bot.command(name='굴려')
+async def start(ctx):
+    # 현재 위치
+    position = 0
+    # 게임판 Embed 메시지 생성
+    board_embed = await ctx.send(embed=get_board_embed(position))
+
+    # 주사위 굴리기 반복
+    while True:
+        # 사용자로부터 주사위 굴리기 입력 받기
+        await ctx.send("주사위를 굴리려면 !roll을 입력하세요.")
+        response = await bot.wait_for("message", check=lambda m: m.author == ctx.author and m.content == "!roll")
+
+        # 주사위 값 계산
+        dice_value = roll_dice()
+
+        # 게임판 위치 업데이트
+        position += dice_value
+        position %= 25
+
+        # 게임판 Embed 메시지 갱신
+        await board_embed.edit(embed=get_board_embed(position))
+        
 class DiceRollView(View):
     def __init__(self, ctx, sheet7, current_field=1):
         super().__init__()
