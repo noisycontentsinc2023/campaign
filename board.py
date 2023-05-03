@@ -75,10 +75,11 @@ descriptions = ["시작점", "미식의 도시 도쿄! 가장 좋아하는 일�
                 "T", "U", "V", "W", "X", "Y", "Z"]
 
 class DiceRollView(discord.ui.View):
-    def __init__(self, sheet7, current_field):
+    def __init__(self, sheet7, current_field, message):
         super().__init__()
         self.sheet7 = sheet7
         self.current_field = current_field
+        self.message = message
 
     async def find_user(self, author):
         username_with_discriminator = f'{author.name}#{author.discriminator}'
