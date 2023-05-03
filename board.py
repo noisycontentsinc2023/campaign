@@ -76,7 +76,7 @@ def create_game_board_embed(position, cities):
   
 class DiceRollView(View):
     def __init__(self, ctx, sheet7, cities, position):
-        super().__init__()
+        super().__init__(timeout=None)  # Add timeout=None to prevent the view from expiring
         self.ctx = ctx
         self.sheet7 = sheet7
         self.cities = cities
@@ -100,7 +100,8 @@ class DiceRollView(View):
                 await interaction.response.send_message(f'You rolled a {dice_roll}!', ephemeral=True)
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
                 game_board_embed = create_game_board_embed(self.position, self.cities)
-                await self.message.edit(embed=game_board_embed)  # Edit the existing game board message
+                new_view = DiceRollView(self.ctx, self.sheet7, self.cities, self.position)  # Create a new DiceRollView instance
+                await self.message.edit(embed=game_board_embed, view=new_view)  # Edit the existing game board message with the new view
             else:
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
