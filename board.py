@@ -72,6 +72,21 @@ class DiceRollView(View):
         self.sheet7 = sheet7 
         self.position = 0
 
+    async def update_board(self, position):
+        cities = await self.sheet7.col_values(1)[1:25]
+        board = ['[ ]' for _ in range(25)]
+        board[position] = '[X]'
+        board_str = ''
+        for i in range(0, 25, 5):
+            board_str += ' '.join(board[i:i+5]) + '\n'
+
+        embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
+        for index, city in enumerate(cities, start=1):
+            embed.add_field(name=f"Field {index}", value=city, inline=True)
+        embed.add_field(name='Board', value=board_str)
+
+        await self.message.edit(embed=embed)
+
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
         cell = await find_user(self.ctx.author, self.sheet7)
@@ -88,26 +103,11 @@ class DiceRollView(View):
                     self.position = 24
 
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
-                await self.update_board()
+                await self.update_board(self.position)
             else:
                 await self.ctx.send('There are no dice to roll.')
         else:
             await self.ctx.send('User not found in the sheet.')
-
-    async def update_board(self):
-        cities = await self.sheet7.col_values(1)[1:25]
-        board = ['[ ]' for _ in range(25)]
-        board[self.position] = '[X]'
-        board_str = ''
-        for i in range(0, 25, 5):
-            board_str += ' '.join(board[i:i+5]) + '\n'
-
-        embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
-        for index, city in enumerate(cities, start=1):
-            embed.add_field(name=f"Field {index}", value=city, inline=True)
-        embed.add_field(name='Board', value=board_str)
-
-        await self.message.edit(embed=embed)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         result = await super().interaction_check(interaction)
