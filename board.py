@@ -98,12 +98,12 @@ class DiceRollView(discord.ui.View):
                 await self.sheet7.update_cell(cell.row, 3, new_position)
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
                 embed = await self.update_embed(new_position)
-                await interaction.message.edit(embed=embed, view=self)
+                await self.original_message.edit(embed=embed, view=self)
+                await interaction.response.send_message(f'You rolled a {dice_roll} and moved to Field {new_position}!', ephemeral=True)
             else:
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
             await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
-        await self.original_message.edit(embed=embed, view=self)  
             
 @bot.command(name='보드')
 async def world(ctx):
@@ -113,8 +113,8 @@ async def world(ctx):
         await ctx.send("User not found in the sheet.")
         return
 
-    current_cell = await sheet7.cell(user_cell.row, 3)  # Add 'await' here
-    current_field = int(current_cell.value)  # Access 'value' attribute after awaiting
+    current_cell = await sheet7.cell(user_cell.row, 3)
+    current_field = int(current_cell.value)
     view = DiceRollView(ctx, sheet7)
     embed = await view.update_embed(current_field)
     view.original_message = await ctx.send(embed=embed, view=view)
