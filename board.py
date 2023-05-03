@@ -65,10 +65,18 @@ async def find_user(user, sheet7):
         print(f'find_user error: {e}')
     return cell
 
-def create_game_board_embed(ctx, position, cities):
+field_names = [
+    "Field 1", "Field 2", "Field 3", "Field 4", "Field 5",
+    "Field 6", "Field 7", "Field 8", "Field 9", "Field 10",
+    "Field 11", "Field 12", "Field 13", "Field 14", "Field 15",
+    "Field 16", "Field 17", "Field 18", "Field 19", "Field 20",
+    "Field 21", "Field 22", "Field 23", "Field 24", "Field 25"
+]
+
+def create_game_board_embed(ctx, position, cities, field_names):
     embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
     for index, city in enumerate(cities, start=1):
-        field_name = f"Field {index}"
+        field_name = field_names[index - 1]  # Use the field names from the list
         field_value = f"{city[0]}"
         if index == position:
             field_value = f"⚪ {city[0]}"
@@ -107,7 +115,6 @@ class DiceRollView(View):
         else:
             await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
 
-
             
 @bot.command(name='보드')
 async def world(ctx):
@@ -120,6 +127,6 @@ async def world(ctx):
     initial_position = 1
     cities = rows[1:26]
     view = DiceRollView(ctx, sheet7, cities, initial_position)
-    await view.send_initial_message(ctx, ctx.channel)  # This line sends the initial embed message with the view
+    await view.send_initial_message(ctx, ctx.channel)
 
 bot.run(TOKEN)
