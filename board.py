@@ -94,9 +94,9 @@ class DiceRollView(View):
         cities = ["New York", "Tokyo", "Paris", "London", "Berlin", "Moscow", "Dubai", "Hong Kong", "Seoul", "Barcelona", "Sydney", "Rio de Janeiro", "Mumbai", "Cape Town", "Buenos Aires", "Cairo", "Istanbul", "Bangkok", "Athens", "Rome", "Toronto", "Vancouver", "Los Angeles", "Chicago", "San Francisco"]
 
         embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
-        for index, city in enumerate(cities, start=1):
+        for index, city in enumerate(cities):
             indicator = "⚪" if index == self.current_field else ""
-            embed.add_field(name=f"Field {index}", value=f"{city} {indicator}", inline=True)
+            embed.add_field(name=city, value=indicator, inline=True)
 
         await self.message.edit(embed=embed, view=self)
 
