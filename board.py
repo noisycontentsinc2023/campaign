@@ -105,7 +105,6 @@ class DiceRollView(discord.ui.View):
         else:
             await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
 
-            
 @bot.command(name='보드')
 async def world(ctx):
     sheet7, _ = await get_sheet7()
@@ -114,10 +113,9 @@ async def world(ctx):
         await ctx.send("User not found in the sheet.")
         return
 
-    current_field_cell = await sheet7.cell(user_cell.row, 3)
-    current_field = int(current_field_cell.value)
+    current_cell = await sheet7.cell(user_cell.row, 3)
+    current_field = int(current_cell.value)
     view = DiceRollView(ctx, sheet7, current_field)
-    embed = await view.update_embed()
-    view.original_message = await ctx.send(embed=embed, view=view)
+    embed = await view.update_embed
 
 bot.run(TOKEN)
