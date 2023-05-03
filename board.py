@@ -93,8 +93,8 @@ class DiceRollView(discord.ui.View):
         user_cell = await self.find_user(self.message.author)
         if user_cell:
             row = user_cell.row
-            if self.current_field >= 25:
-                self.current_field %= 25
+            if self.current_field >= 26:
+                self.current_field %= 26
                 laps_completed = int(await self.sheet7.acell(f'D{row}').value) + 1
                 await self.sheet7.update_cell(row, 4, laps_completed)
                 await self.sheet7.update_cell(row, 2, int(await self.sheet7.acell(f'B{row}').value) + 1)  # Add one dice
