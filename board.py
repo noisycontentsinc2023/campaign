@@ -142,7 +142,7 @@ async def world(ctx):
         else:
             embed.add_field(name=board[i], value=descriptions[i], inline=True)
 
-    view = DiceRollView(sheet7, current_field)
+    view = DiceRollView(game_board_message, sheet7, current_field)
     await view.update_board()  # 뷰 생성 시 업데이트된 값을 시트에 반영
     game_board_message = await ctx.send(embed=view.get_board_embed(), view=view)
     view.message = game_board_message
