@@ -80,6 +80,10 @@ class DiceRollView(View):
         self.ctx = ctx
         self.sheet7 = sheet7
         self.position = position
+        self.message = None
+
+    async def send_initial_message(self, ctx, channel):
+        self.message = await channel.send(embed=create_game_board_embed(self.position), view=self)
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -95,7 +99,7 @@ class DiceRollView(View):
                 await interaction.response.send_message(f'You rolled a {dice_roll}!', ephemeral=True)
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
                 game_board_embed = create_game_board_embed(self.position)
-                await self.ctx.send(embed=game_board_embed)  # Send the updated game board
+                await self.message.edit(embed=game_board_embed)  # Edit the existing game board message
             else:
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
@@ -110,8 +114,7 @@ async def world(ctx):
         return
 
     initial_position = 1
-    game_board_embed = create_game_board_embed(initial_position)
     view = DiceRollView(ctx, sheet7, initial_position)
-    await ctx.send(embed=game_board_embed, view=view)
+    await view.send_initial_message(ctx, ctx.channel)
 
 bot.run(TOKEN)
