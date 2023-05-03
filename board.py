@@ -99,8 +99,8 @@ class DiceRollView(discord.ui.View):
                 await self.sheet7.update_cell(row, 4, laps_completed)
                 await self.sheet7.update_cell(row, 2, int(await self.sheet7.acell(f'B{row}').value) + 1)  # Add one dice
                 await self.message.channel.send(f"Congratulations! You have completed {laps_completed} laps! You got 1 extra dice.")
-
-            await self.sheet7.update_cell(row, 3, self.current_field)
+            await self.sheet7.update_cell(row, 3, self.current_field)  # Update the new position in column C
+            await self.sheet7.update_cell(row, 2, int(await self.sheet7.acell(f'B{row}').value) - 1)  # Decrease the dice count by 1
         else:
             print("User not found in the sheet.")
 
