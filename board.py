@@ -64,26 +64,12 @@ async def find_user(user, sheet7):
     except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
         print(f'find_user error: {e}')
     return cell
-
-def create_game_board_embed(position):
-    embed = discord.Embed(title="Game Board", description="This is the game board.")
-    for i in range(1, 26):
-        if i == position:
-            embed.add_field(name=f"Position {i}", value=":white_circle:", inline=True)
-        else:
-            embed.add_field(name=f"Position {i}", value=":black_circle:", inline=True)
-    return embed
   
 class DiceRollView(View):
-    def __init__(self, ctx, sheet7, position):
+    def __init__(self, ctx, sheet7):
         super().__init__()
         self.ctx = ctx
-        self.sheet7 = sheet7
-        self.position = position
-        self.message = None
-
-    async def send_initial_message(self, ctx, channel):
-        self.message = await channel.send(embed=create_game_board_embed(self.position), view=self)
+        self.sheet7 = sheet7 
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -93,18 +79,13 @@ class DiceRollView(View):
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                self.position += dice_roll
-                if self.position > 25:
-                    self.position = 25
-                await interaction.response.send_message(f'You rolled a {dice_roll}!', ephemeral=True)
+                await self.ctx.send(f'You rolled a {dice_roll}!')  # 수정된 부분
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
-                game_board_embed = create_game_board_embed(self.position)
-                await self.message.edit(embed=game_board_embed)  # Edit the existing game board message
             else:
-                await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
+                await self.ctx.send('There are no dice to roll.')  # 수정된 부분
         else:
-            await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
-
+            await self.ctx.send('User not found in the sheet.')  # 수정된 부분
+            
 @bot.command(name='보드')
 async def world(ctx):
     sheet7, rows = await get_sheet7()
@@ -113,8 +94,13 @@ async def world(ctx):
         await ctx.send("User not found in the sheet.")
         return
 
-    initial_position = 1
-    view = DiceRollView(ctx, sheet7, initial_position)
-    await view.send_initial_message(ctx, ctx.channel)
+    cities = rows[1:26]
+
+    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
+    for index, city in enumerate(cities, start=1):
+        embed.add_field(name=f"Field {index}", value=city[0], inline=True)
+
+    view = DiceRollView(ctx, sheet7)
+    await ctx.send(embed=embed, view=view)
 
 bot.run(TOKEN)
