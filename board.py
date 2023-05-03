@@ -103,7 +103,7 @@ async def world(ctx):
     sheet7, rows = await get_sheet7()
     user_cell = await find_user(ctx.author, sheet7)
     if not user_cell:
-        await ctx.send("User not found in the sheet.")
+        await interaction.response.send_message("User not found in the sheet.", ephemeral=True)
         return
 
     view = DiceRollView(ctx, sheet7)
