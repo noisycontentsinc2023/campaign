@@ -114,8 +114,8 @@ async def world(ctx):
 
     current_cell = await sheet7.cell(user_cell.row, 3)  # Add 'await' here
     current_field = int(current_cell.value)  # Access 'value' attribute after awaiting
-    embed = await view.update_embed(current_field)
     view = DiceRollView(ctx, sheet7)
+    embed = await view.update_embed(current_field)
     await ctx.send(embed=embed, view=view)
 
 bot.run(TOKEN)
