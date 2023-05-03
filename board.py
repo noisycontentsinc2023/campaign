@@ -85,7 +85,7 @@ class DiceRollView(View):
             embed.add_field(name=f"Field {index}", value=city, inline=True)
         embed.add_field(name='Board', value=board_str)
 
-        await self.message.edit(embed=embed)
+        return await self.ctx.send(embed=embed)
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -103,7 +103,8 @@ class DiceRollView(View):
                     self.position = 24
 
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
-                await self.update_board(self.position)
+                message = await self.update_board(self.position)
+                self.message = message
             else:
                 await self.ctx.send('There are no dice to roll.')
         else:
@@ -114,6 +115,7 @@ class DiceRollView(View):
         if result:
             self.message = interaction.message
         return result
+
 
 @bot.command(name='보드')
 async def world(ctx):
@@ -128,6 +130,10 @@ async def world(ctx):
     board_str = ''
     for i in range(0, 24, 5):
         board_str += '[ ] [ ] [ ] [ ] [ ]\n'
-    embed.add_field
+    embed.add_field(name='Board', value=board_str)
+
+    view = DiceRollView(ctx, sheet7)
+    message = await ctx.send(embed=embed, view=view)
+    view.message = message
     
 bot.run(TOKEN)
