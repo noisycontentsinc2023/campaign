@@ -66,12 +66,12 @@ async def find_user(user, sheet7):
     return cell
   
 class DiceRollView(View):
-    def __init__(self, ctx, sheet7):
+    def __init__(self, ctx, sheet7, board_message):
         super().__init__()
         self.ctx = ctx
         self.sheet7 = sheet7 
+        self.board_message = board_message
         self.position = 0
-        self.board_message = None
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -85,8 +85,8 @@ class DiceRollView(View):
 
                 # update the position of the game piece based on the dice roll
                 self.position += dice_roll
-                if self.position >= 25:
-                    self.position = 25
+                if self.position >= 24:
+                    self.position = 24
 
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
                 await self.update_board()
@@ -96,21 +96,18 @@ class DiceRollView(View):
             await self.ctx.send('User not found in the sheet.')
 
     async def update_board(self):
-        cities = await self.sheet7.col_values(1)[1:26]
-        board = ['[ ]' for _ in range(25)]
+        cities = await self.sheet7.col_values(1)[1:25]
+        board = ['[ ]' for _ in range(24)]
         board[self.position] = '[X]'
 
         board_str = ''
-        for i in range(0, 25, 5):
+        for i in range(0, 24, 5):
             board_str += ' '.join(board[i:i+5]) + '\n'
 
         embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
         embed.add_field(name='Board', value=board_str)
 
-        if self.board_message:
-            await self.board_message.edit(embed=embed)
-        else:
-            self.board_message = await self.ctx.send(embed=embed)
+        await self.board_message.edit(embed=embed)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         result = await super().interaction_check(interaction)
@@ -126,8 +123,11 @@ async def world(ctx):
         await ctx.send("User not found in the sheet.")
         return
 
-    cities = rows[1:26]
-    view = DiceRollView(ctx, sheet7)
+    cities = rows[1:25]
     embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
+    board_str = ''
+    for i in range(0, 24, 5):
+        board_str += '[ ] [ ] [ ] [ ] [ ]\n'
+    embed.add_field
     
 bot.run(TOKEN)
