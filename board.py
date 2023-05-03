@@ -110,8 +110,9 @@ class DiceRollView(discord.ui.View):
             dice_count = int(await self.sheet7.acell(f'B{cell.row}').value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                self.current_field += dice_roll  # Update current position
-                await interaction.response.send_message(f"You rolled a {dice_roll} and moved to {board[self.current_field % 25]}.", ephemeral=True)
+                new_position = self.current_field + dice_roll
+                await interaction.response.send_message(f"You rolled a {dice_roll} and moved to {board[new_position % 25]}!", ephemeral=True)
+                self.current_field = new_position
                 await self.update_board()
                 await self.game_board_message.edit(embed=self.get_board_embed(), view=self)
             else:
