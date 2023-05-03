@@ -84,16 +84,17 @@ def create_game_board_embed(ctx, position, cities, field_names):
     return embed
 
 class DiceRollView(View):
-    def __init__(self, ctx, sheet7, cities, position):
+    def __init__(self, ctx, sheet7, cities, position, field_names):
         super().__init__(timeout=None)
         self.ctx = ctx
         self.sheet7 = sheet7
         self.cities = cities
         self.position = position
+        self.field_names = field_names
         self.message = None
 
     async def send_initial_message(self, ctx, channel):
-        self.message = await channel.send(embed=create_game_board_embed(self.position, self.cities), view=self)
+        self.message = await channel.send(embed=create_game_board_embed(ctx, self.position, self.cities, self.field_names), view=self)
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -108,14 +109,13 @@ class DiceRollView(View):
                     self.position = 25
                 await interaction.response.send_message(f'You rolled a {dice_roll}!', ephemeral=True)
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
-                game_board_embed = create_game_board_embed(self.position, self.cities)
+                game_board_embed = create_game_board_embed(self.ctx, self.position, self.cities, self.field_names)
                 await self.message.edit(embed=game_board_embed)
             else:
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
             await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
 
-            
 @bot.command(name='보드')
 async def world(ctx):
     sheet7, rows = await get_sheet7()
@@ -126,7 +126,7 @@ async def world(ctx):
 
     initial_position = 1
     cities = rows[1:26]
-    view = DiceRollView(ctx, sheet7, cities, initial_position)
+    view = DiceRollView(ctx, sheet7, cities, initial_position, field_names)
     await view.send_initial_message(ctx, ctx.channel)
 
 bot.run(TOKEN)
