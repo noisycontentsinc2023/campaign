@@ -65,54 +65,28 @@ async def find_user(user, sheet7):
         print(f'find_user error: {e}')
     return cell
   
-# create a custom view for the dice rolling
-class DiceRollView(discord.ui.View):
-    def __init__(self, ctx, sheet7, board, position):
-        super().__init__(timeout=180.0)
+class DiceRollView(View):
+    def __init__(self, ctx, sheet7):
+        super().__init__()
         self.ctx = ctx
-        self.sheet7 = sheet7
-        self.board = board
-        self.position = position
-
-    async def update_board(self):
-        cities = await self.sheet7.col_values(1)[1:25]
-        embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
-        for index, city in enumerate(cities, start=1):
-            value = f":white_circle: {city}" if self.board[index - 1] else f":black_circle: {city}"
-            embed.add_field(name=f"Field {index}", value=value, inline=True)
-
-        await self.message.edit(embed=embed)
+        self.sheet7 = sheet7 
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
         cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
-            cell_value = await self.sheet7.acell(f'B{cell.row}")
+            cell_value = await self.sheet7.acell(f'B{cell.row}')
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                await self.ctx.send(f'You rolled a {dice_roll}!')
-
-                # update the position of the game piece based on the dice roll
-                self.position += dice_roll
-                if self.position >= 24:
-                    self.position = 24
-
-                self.board = [False] * 25
-                self.board[self.position] = True
-
-                await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
-                await self.update_board()
+                current_field = int(cell_value.value) + dice_roll
+                await self.ctx.author.send(f'You rolled a {dice_roll} and moved to Field {current_field}!')  # Private message
+                await self.sheet7.update_cell(cell.row, 2, current_field)
+                await self.ctx.send(f'{self.ctx.author.mention} rolled a {dice_roll} and moved to Field {current_field}!', view=None)  # Update embed message
             else:
-                await self.ctx.send('There are no dice to roll.')
+                await self.ctx.send('There are no dice to roll.', view=None)
         else:
-            await self.ctx.send('User not found in the sheet.')
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        result = await super().interaction_check(interaction)
-        if result:
-            self.message = interaction.message
-        return result
+            await self.ctx.send('User not found in the sheet.', view=None)
 
 @bot.command(name='보드')
 async def world(ctx):
@@ -122,17 +96,13 @@ async def world(ctx):
         await ctx.send("User not found in the sheet.")
         return
 
-    cities = rows[1:25]
+    cities = ["New York", "Tokyo", "Paris", "London", "Berlin", "Moscow", "Dubai", "Hong Kong", "Seoul", "Barcelona", "Sydney", "Rio de Janeiro", "Mumbai", "Cape Town", "Buenos Aires", "Cairo", "Istanbul", "Bangkok", "Athens", "Rome", "Toronto", "Vancouver", "Los Angeles", "Chicago", "San Francisco"]
 
-    # Create the game board as an embed
-    board = ''
-    for i in range(1, 26):
-        board += f"Field {i}: {cities[i-1]}\n"
     embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
-    embed.add_field(name="Board", value=board)
+    for index, city in enumerate(cities, start=1):
+        embed.add_field(name=f"Field {index}", value=city, inline=True)
 
-    # Add the roll dice button to the embed
-    view = DiceRollView(ctx=ctx, sheet7=sheet7)
-    view.message = await ctx.send(embed=embed, view=view)
+    view = DiceRollView(ctx, sheet7)
+    await ctx.send(embed=embed, view=view)
     
 bot.run(TOKEN)
