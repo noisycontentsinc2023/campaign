@@ -80,22 +80,21 @@ class DiceRollView(View):
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                self.current_field = int(cell_value.value) + dice_roll
-                await self.ctx.author.send(f'You rolled a {dice_roll} and moved to {CITIES[self.current_field]}!')  # Private message
+                self.current_field = int(cell_value.value) + dice_roll  # 현재 위치 갱신
+                await interaction.response.send_message(f"You rolled a {dice_roll} and moved to {CITIES[self.current_field]}!", ephemeral=True)
                 await self.sheet7.update_cell(cell.row, 2, self.current_field)
-                await interaction.response.edit_message(view=self)
+                await interaction.message.edit(view=self)
                 await self.update_board()
             else:
-                await self.ctx.send('There are no dice to roll.', view=None)
+                await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
-            await self.ctx.send('User not found in the sheet.', view=None)
+            await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
 
     async def update_board(self):
         embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
         for index, city in enumerate(CITIES):
             indicator = "⚪" if index == self.current_field else ""
             embed.add_field(name=city, value=indicator, inline=True)
-
         await self.message.edit(embed=embed, view=self)
 
 
