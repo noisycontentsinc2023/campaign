@@ -96,14 +96,15 @@ class DiceRollView(discord.ui.View):
                 current_position = int(current_position_cell.value)  # Cast value to int
                 new_position = current_position + dice_roll
                 await self.sheet7.update_cell(cell.row, 3, new_position)
-                await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
+                self.current_field = new_position
+                await interaction.response.send_message(f'You rolled a {dice_roll} and moved to Field {new_position}!', ephemeral=True)
                 embed = await self.update_embed(new_position)
                 await self.original_message.edit(embed=embed, view=self)
-                await interaction.response.send_message(f'You rolled a {dice_roll} and moved to Field {new_position}!', ephemeral=True)
             else:
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
             await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
+            
             
 @bot.command(name='보드')
 async def world(ctx):
