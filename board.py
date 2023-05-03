@@ -66,11 +66,12 @@ async def find_user(user, sheet7):
     return cell
   
 class DiceRollView(View):
-    def __init__(self, ctx, sheet7, current_field):
+    def __init__(self, ctx, sheet7, current_field, board_message):
         super().__init__()
         self.ctx = ctx
         self.sheet7 = sheet7
         self.current_field = current_field
+        self.board_message = board_message
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -83,23 +84,23 @@ class DiceRollView(View):
                 self.current_field = int(cell_value.value) + dice_roll
                 await self.ctx.author.send(f'You rolled a {dice_roll} and moved to Field {self.current_field}!')  # Private message
                 await self.sheet7.update_cell(cell.row, 2, self.current_field)
-                await interaction.response.edit_message(content=f'{self.ctx.author.mention} rolled a {dice_roll} and moved to Field {self.current_field}!', view=None)  # Update embed message
-                await update_board(self.ctx, self.sheet7, self.current_field)
+                await interaction.response.edit_message(content=f'{self.ctx.author.mention} rolled a {dice_roll} and moved to Field {self.current_field}!')  # Update message
+                await self.update_board()
             else:
                 await self.ctx.send('There are no dice to roll.', view=None)
         else:
             await self.ctx.send('User not found in the sheet.', view=None)
 
-async def update_board(ctx, sheet7, current_field):
-    cities = ["New York", "Tokyo", "Paris", "London", "Berlin", "Moscow", "Dubai", "Hong Kong", "Seoul", "Barcelona", "Sydney", "Rio de Janeiro", "Mumbai", "Cape Town", "Buenos Aires", "Cairo", "Istanbul", "Bangkok", "Athens", "Rome", "Toronto", "Vancouver", "Los Angeles", "Chicago", "San Francisco"]
+    async def update_board(self):
+        cities = ["New York", "Tokyo", "Paris", "London", "Berlin", "Moscow", "Dubai", "Hong Kong", "Seoul", "Barcelona", "Sydney", "Rio de Janeiro", "Mumbai", "Cape Town", "Buenos Aires", "Cairo", "Istanbul", "Bangkok", "Athens", "Rome", "Toronto", "Vancouver", "Los Angeles", "Chicago", "San Francisco"]
 
-    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
-    for index, city in enumerate(cities, start=1):
-        indicator = "⚪" if index == current_field else ""
-        embed.add_field(name=f"Field {index}", value=f"{city} {indicator}", inline=True)
+        embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
+        for index, city in enumerate(cities, start=1):
+            indicator = "⚪" if index == self.current_field else ""
+            embed.add_field(name=f"Field {index}", value=f"{city} {indicator}", inline=True)
 
-    view = DiceRollView(ctx, sheet7, current_field)
-    await ctx.send(embed=embed, view=view)
+        view = DiceRollView(self.ctx, self.sheet7, self.current_field, self.board_message)
+        await self.board_message.edit(embed=embed, view=view)
 
 @bot.command(name='보드')
 async def world(ctx):
@@ -110,6 +111,9 @@ async def world(ctx):
         return
 
     current_field = 1  # Start at Field 1
-    await update_board(ctx, sheet7, current_field)
+
+    cities = ["New York", "Tokyo", "Paris", "London", "Berlin", "Moscow", "Dubai", "Hong Kong", "Seoul", "Barcelona", "Sydney", "Rio de Janeiro", "Mumbai", "Cape Town", "Buenos Aires", "Cairo", "Istanbul", "Bangkok", "Athens", "Rome", "Toronto", "Vancouver", "Los Angeles", "Chicago", "San Francisco"]
+
+    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention
     
 bot.run(TOKEN)
