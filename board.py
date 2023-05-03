@@ -112,7 +112,7 @@ async def world(ctx):
     embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
     for index, city in enumerate(cities):
         embed.add_field(name=city, value="", inline=True)
-    message = await ctx.author.send(embed=embed)
+    message = await ctx.author.send(embed=embed, ephemeral=True)
 
     # Delete the original message in the server
     await ctx.message.delete()
