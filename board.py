@@ -81,7 +81,6 @@ class DiceRollView(discord.ui.View):
         self.sheet7 = sheet7
         self.current_field = current_field
         self.message = message
-        self.add_item(discord.ui.Button(label="Roll the dice", custom_id="roll_dice"))
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user == self.message.author
@@ -141,6 +140,11 @@ class DiceRollView(discord.ui.View):
                 embed.add_field(name=f":red_square: {board[i]}", value=f":arrow_right: {descriptions[i]}", inline=True)
             else:
                 embed.add_field(name=board[i], value=descriptions[i], inline=True)
+
+        # Add the button
+        embed.set_footer(text="Click the button to roll the dice.")
+        self.clear_items()
+        self.add_item(discord.ui.Button(label="Roll the dice", custom_id="roll_dice"))
 
         return embed
       
