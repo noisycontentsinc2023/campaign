@@ -64,38 +64,12 @@ async def find_user(user, sheet7):
     except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
         print(f'find_user error: {e}')
     return cell
-
-field_names = [
-    "시작점", "Field 2", "Field 3", "Field 4", "Field 5",
-    "Field 6", "Field 7", "Field 8", "Field 9", "Field 10",
-    "Field 11", "Field 12", "Field 13", "Field 14", "Field 15",
-    "Field 16", "Field 17", "Field 18", "Field 19", "Field 20",
-    "Field 21", "Field 22", "Field 23", "Field 24", "Field 25"
-]
-
-def create_game_board_embed(ctx, position, cities, field_names):
-    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
-    for index, city in enumerate(cities, start=1):
-        field_name = field_names[index - 1]
-        field_value = f"{city[0]}"
-        if index == position:
-            field_value = f"⚪ {city[0]}"
-        embed.add_field(name=field_name, value=field_value, inline=True)
-    return embed
-
+  
 class DiceRollView(View):
-    def __init__(self, ctx, sheet7, cities, position, field_names):
-        super().__init__(timeout=None)
+    def __init__(self, ctx, sheet7):
+        super().__init__()
         self.ctx = ctx
-        self.sheet7 = sheet7
-        self.cities = cities
-        self.position = position
-        self.field_names = field_names
-        self.message = None
-
-    async def send_initial_message(self, ctx, channel):
-        embed = create_game_board_embed(ctx, self.position, self.cities, self.field_names)
-        self.message = await channel.send(embed=embed, view=self)
+        self.sheet7 = sheet7 
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -105,20 +79,13 @@ class DiceRollView(View):
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                self.position += dice_roll
-                if self.position > 25:
-                    self.position = 25
-                await interaction.response.send_message(f'You rolled a {dice_roll}!', ephemeral=True)
+                await self.ctx.send(f'You rolled a {dice_roll}!')  # 수정된 부분
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
-                game_board_embed = create_game_board_embed(self.ctx, self.position, self.cities, self.field_names)
-                await interaction.response.edit_message(embed=game_board_embed)  # Update this line
-
-
             else:
-                await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
+                await self.ctx.send('There are no dice to roll.')  # 수정된 부분
         else:
-            await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
-
+            await self.ctx.send('User not found in the sheet.')  # 수정된 부분
+            
 @bot.command(name='보드')
 async def world(ctx):
     sheet7, rows = await get_sheet7()
@@ -127,9 +94,13 @@ async def world(ctx):
         await ctx.send("User not found in the sheet.")
         return
 
-    initial_position = 1
     cities = rows[1:26]
-    view = DiceRollView(ctx, sheet7, cities, initial_position, field_names)
-    await view.send_initial_message(ctx, ctx.channel)
+
+    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
+    for index, city in enumerate(cities, start=1):
+        embed.add_field(name=f"Field {index}", value=city[0], inline=True)
+
+    view = DiceRollView(ctx, sheet7)
+    await ctx.send(embed=embed, view=view)
 
 bot.run(TOKEN)
