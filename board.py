@@ -93,9 +93,6 @@ class DiceRollView(View):
         self.field_names = field_names
         self.message = None
 
-    async def send_initial_message(self, ctx, channel):
-        self.message = await channel.send(embed=create_game_board_embed(ctx, self.position, self.cities, self.field_names), view=self)
-
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
         cell = await find_user(self.ctx.author, self.sheet7)
