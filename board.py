@@ -61,112 +61,59 @@ async def find_user(user, sheet7):
         cells = await sheet7.findall(username_with_discriminator)
         if cells:
             cell = cells[0]
-    except gspread_asyncio.exceptions.APIError as e:
+    except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
         print(f'find_user error: {e}')
     return cell
-
-# 보드 게임판
-board = ["START", "도쿄", "무인도", "이벤트", "4", "5", "6", "7", "8", "9", "10",
-         "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
-         "21", "22", "23", "24", "25"]
-
-# 보드 게임판의 각 칸 설명
-descriptions = ["시작점", "미식의 도시 도쿄! 가장 좋아하는 일본 요리를 일본어로 공유해주세요", "하루 동안 주사위를 굴릴 수 없습니다", "인벤트 버튼을 클릭하세요", "D", "E", "F", "G", "H", "I",
-                "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
-                "T", "U", "V", "W", "X", "Y", "Z"]
-
+  
 class DiceRollView(discord.ui.View):
-    def __init__(self, sheet7, current_field, message):
+    def __init__(self, ctx, sheet7):
         super().__init__()
+        self.ctx = ctx
         self.sheet7 = sheet7
-        self.current_field = current_field
-        self.message = message
+        self.current_field = 1
 
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return interaction.user == self.message.author
+    async def update_embed(self, new_field):
+        cities = await self.sheet7.get_all_values()
+        cities = cities[1:26]
+        embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
+        for index, city in enumerate(cities, start=1):
+            if index == new_field:
+                embed.add_field(name=f"Field {index} (Current)", value=city[0], inline=True)
+            else:
+                embed.add_field(name=f"Field {index}", value=city[0], inline=True)
+        return embed
 
-    async def on_button_click(self, interaction: discord.Interaction):
-        if interaction.data["custom_id"] == "roll_dice":
-            await self.roll_the_dice(interaction)
-
-
-    async def find_user(self, author):
-        username_with_discriminator = f'{author.name}#{author.discriminator}'
-        cells = await self.sheet7.findall(username_with_discriminator)
-        if cells:
-            return cells[0]
-        else:
-            return None
-
-    async def update_board(self):
-        user_cell = await self.find_user(self.message.author)
-        if user_cell:
-            row = user_cell.row
-            if self.current_field >= 26:
-                self.current_field %= 26
-                laps_completed = int(await self.sheet7.acell(f'D{row}').value) + 1
-                await self.sheet7.update_cell(row, 4, laps_completed)
-                await self.sheet7.update_cell(row, 2, int(await self.sheet7.acell(f'B{row}').value) + 1)  # Add one dice
-                await self.message.channel.send(f"Congratulations! You have completed {laps_completed} laps! You got 1 extra dice.")
-            await self.sheet7.update_cell(row, 3, self.current_field)  # Update the new position in column C
-            await self.sheet7.update_cell(row, 2, int(await self.sheet7.acell(f'B{row}').value) - 1)  # Decrease the dice count by 1
-        else:
-            print("User not found in the sheet.")
-
-    async def roll_the_dice(self, interaction: discord.Interaction):
-        cell = await self.find_user(interaction.user)
+    @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
+    async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
+        cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
-            dice_count = int(await self.sheet7.acell(f'B{cell.row}').value)
+            cell_value = await self.sheet7.acell(f'B{cell.row}')
+            dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                new_position = self.current_field + dice_roll
-                self.current_field = new_position % 26
-                await interaction.response.send_message(f"You rolled a {dice_roll} and moved to {board[self.current_field]}!", ephemeral=True)
-                await self.update_board()
-                await self.message.edit(embed=self.get_board_embed(), view=self)
+                current_position = int(await self.sheet7.cell(cell.row, 3).value)
+                new_position = current_position + dice_roll
+                await self.sheet7.update_cell(cell.row, 3, new_position)
+                await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
+                embed = await self.update_embed(new_position)
+                await interaction.message.edit(embed=embed)
+                await interaction.response.send_message(f'You rolled a {dice_roll} and moved to Field {new_position}!', ephemeral=True)
             else:
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
             await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
-
-    def get_board_embed(self):
-        # Create Embed object
-        embed = discord.Embed(title="Game Board", color=discord.Color.blue())
-
-        # Add fields to the game board Embed
-        for i in range(25):
-            # Show current position
-            if i == self.current_field % 25:
-                embed.add_field(name=f":red_square: {board[i]}", value=f":arrow_right: {descriptions[i]}", inline=True)
-            else:
-                embed.add_field(name=board[i], value=descriptions[i], inline=True)
-
-        # Add the button
-        embed.set_footer(text="Click the button to roll the dice.")
-        self.clear_items()
-        self.add_item(discord.ui.Button(label="Roll the dice", custom_id="roll_dice"))
-
-        return embed
-      
+            
 @bot.command(name='보드')
 async def world(ctx):
-    sheet7, rows = await get_sheet7()
+    sheet7, _ = await get_sheet7()
     user_cell = await find_user(ctx.author, sheet7)
     if not user_cell:
         await ctx.send("User not found in the sheet.")
         return
 
-    current_field = int(rows[user_cell.row - 1][2])  # Get current position from sheet
-    embed = discord.Embed(title="Game Board", color=discord.Color.blue())
-    for i in range(25):
-        # Show current position
-        if i == current_field % 25:
-            embed.add_field(name=f":red_square: {board[i]}", value=f":arrow_right: {descriptions[i]}", inline=True)
-        else:
-            embed.add_field(name=board[i], value=descriptions[i], inline=True)
+    current_field = int(await sheet7.cell(user_cell.row, 3).value)
+    view = DiceRollView(ctx, sheet7)
+    embed = await view.update_embed(current_field)
+    await ctx.send(embed=embed, view=view)
 
-    view = DiceRollView(sheet7, current_field, None)
-    game_board_message = await ctx.send(embed=view.get_board_embed(), view=view)
-    view.message = game_board_message
-                            
 bot.run(TOKEN)
