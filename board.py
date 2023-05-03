@@ -54,16 +54,6 @@ async def get_sheet7():
     rows = await sheet7.get_all_values()
     return sheet7, rows
   
-async def find_user(user, sheet7):
-    cell = None
-    try:
-        username_with_discriminator = f'{user.name}#{user.discriminator}'
-        cells = await sheet7.findall(username_with_discriminator)
-        if cells:
-            cell = cells[0]
-    except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
-        print(f'find_user error: {e}')
-    return cell
 
 # 보드 게임판
 board = ["START", "도쿄", "무인도", "이벤트", "4", "5", "6", "7", "8", "9", "10",
@@ -93,18 +83,18 @@ class DiceRollView(discord.ui.View):
         user_cell = await self.find_user(self.message.author)
         if user_cell:
             row = user_cell.row
-            await self.sheet7.update_cell(row, 2, self.current_field)
+            await self.sheet7.update_cell(row, 3, self.current_field)  # 주사위 굴린 결과를 3번째 열에 업데이트
+            await self.sheet7.update_cell(row, 2, int(await self.sheet7.acell(f'B{row}').value) - 1)  # 주사위를 굴린 횟수를 1 줄임
 
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
         cell = await self.find_user(interaction.user)
         if cell:
-            cell_value = await self.sheet7.acell(f'B{cell.row}')
-            dice_count = int(cell_value.value)
+            dice_count = int(await self.sheet7.acell(f'B{cell.row}').value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
                 self.current_field += dice_roll  # 현재 위치 갱신
                 await interaction.response.send_message(f"You rolled a {dice_roll} and moved to {board[self.current_field-1]}!", ephemeral=True)
-                await self.sheet7.update_cell(cell.row, 2, self.current_field)
+                await self.update_board()
                 await self.game_board_message.edit(embed=self.get_board_embed(), view=self)
             else:
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
@@ -118,7 +108,7 @@ class DiceRollView(discord.ui.View):
         # 게임판 Embed에 Field 추가
         for i in range(25):
             # 현재 위치에는 표시
-            if i == current_field - 1:
+            if i == self.current_field - 1:
                 embed.add_field(name=f":red_square: {board[i]}", value=f":arrow_right: {descriptions[i]}", inline=True)
             else:
                 embed.add_field(name=board[i], value=descriptions[i], inline=True)
@@ -143,7 +133,8 @@ async def world(ctx):
             embed.add_field(name=board[i], value=descriptions[i], inline=True)
 
     view = DiceRollView(sheet7, current_field)
-    game_board_message = await ctx.send(embed=get_board_embed(current_field), view=view)
+    await view.update_board()  # 뷰 생성 시 업데이트된 값을 시트에 반영
+    game_board_message = await ctx.send(embed=view.get_board_embed(), view=view)
     view.message = game_board_message
 
 bot.run(TOKEN)
