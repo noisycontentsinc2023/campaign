@@ -81,6 +81,15 @@ class DiceRollView(discord.ui.View):
         self.sheet7 = sheet7
         self.current_field = current_field
         self.message = message
+        self.add_item(discord.ui.Button(label="Roll the dice", custom_id="roll_dice"))
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return interaction.user == self.message.author
+
+    async def on_button_click(self, interaction: discord.Interaction):
+        if interaction.data["custom_id"] == "roll_dice":
+            await self.roll_the_dice(interaction)
+
 
     async def find_user(self, author):
         username_with_discriminator = f'{author.name}#{author.discriminator}'
@@ -105,17 +114,17 @@ class DiceRollView(discord.ui.View):
         else:
             print("User not found in the sheet.")
 
-    async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def roll_the_dice(self, interaction: discord.Interaction):
         cell = await self.find_user(interaction.user)
         if cell:
             dice_count = int(await self.sheet7.acell(f'B{cell.row}').value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
                 new_position = self.current_field + dice_roll
-                await interaction.response.send_message(f"You rolled a {dice_roll} and moved to {board[new_position % 25]}!", ephemeral=True)
-                self.current_field = new_position
+                self.current_field = new_position % 26
+                await interaction.response.send_message(f"You rolled a {dice_roll} and moved to {board[self.current_field]}!", ephemeral=True)
                 await self.update_board()
-                await self.game_board_message.edit(embed=self.get_board_embed(), view=self)
+                await self.message.edit(embed=self.get_board_embed(), view=self)
             else:
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
