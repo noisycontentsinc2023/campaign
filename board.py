@@ -70,7 +70,8 @@ class DiceRollView(View):
         super().__init__()
         self.ctx = ctx
         self.sheet7 = sheet7 
-        self.position = 0  # initialize the position of the game piece to the start
+        self.position = 0
+        self.board_message = None
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -81,13 +82,13 @@ class DiceRollView(View):
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
                 await self.ctx.send(f'You rolled a {dice_roll}!')
-                await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
 
                 # update the position of the game piece based on the dice roll
                 self.position += dice_roll
                 if self.position >= 25:
-                    self.position = 25  # make sure the game piece stays within the bounds of the board
+                    self.position = 25
 
+                await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
                 await self.update_board()
             else:
                 await self.ctx.send('There are no dice to roll.')
@@ -95,30 +96,28 @@ class DiceRollView(View):
             await self.ctx.send('User not found in the sheet.')
 
     async def update_board(self):
-        cities = await self.sheet7.col_values(1)[1:26]  # get the city names from the sheet
-        board = ['[ ]' for _ in range(25)]  # initialize the board with empty spaces
-
-        # update the board with the game piece
+        cities = await self.sheet7.col_values(1)[1:26]
+        board = ['[ ]' for _ in range(25)]
         board[self.position] = '[X]'
 
-        # create a string representation of the board
         board_str = ''
         for i in range(0, 25, 5):
             board_str += ' '.join(board[i:i+5]) + '\n'
 
-        # create an embed with the updated board
         embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
         embed.add_field(name='Board', value=board_str)
 
-        await self.message.edit(embed=embed)
+        if self.board_message:
+            await self.board_message.edit(embed=embed)
+        else:
+            self.board_message = await self.ctx.send(embed=embed)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         result = await super().interaction_check(interaction)
         if result:
-            # cache the message to be edited later
-            self.message = interaction.message
+            self.board_message = interaction.message
         return result
-            
+
 @bot.command(name='보드')
 async def world(ctx):
     sheet7, rows = await get_sheet7()
@@ -128,12 +127,7 @@ async def world(ctx):
         return
 
     cities = rows[1:26]
-
-    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
-    for index, city in enumerate(cities, start=1):
-        embed.add_field(name=f"Field {index}", value=city[0], inline=True)
-
     view = DiceRollView(ctx, sheet7)
-    await ctx.send(embed=embed, view=view)
-
+    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
+    
 bot.run(TOKEN)
