@@ -71,6 +71,7 @@ class DiceRollView(discord.ui.View):
         self.ctx = ctx
         self.sheet7 = sheet7
         self.current_field = 1
+        self.original_message = None
 
     async def update_embed(self, new_field):
         cities = await self.sheet7.get_all_values()
@@ -102,6 +103,7 @@ class DiceRollView(discord.ui.View):
                 await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
         else:
             await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
+        await self.original_message.edit(embed=embed, view=self)  
             
 @bot.command(name='보드')
 async def world(ctx):
@@ -115,6 +117,6 @@ async def world(ctx):
     current_field = int(current_cell.value)  # Access 'value' attribute after awaiting
     view = DiceRollView(ctx, sheet7)
     embed = await view.update_embed(current_field)
-    await ctx.send(embed=embed, view=view)
+    view.original_message = await ctx.send(embed=embed, view=view)
 
 bot.run(TOKEN)
