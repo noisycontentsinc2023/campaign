@@ -106,7 +106,7 @@ class DiceRollView(View):
                 new_location_cell = await self.sheet7.cell(1, new_location_col)
                 new_location_name = new_location_cell.value
 
-                await interaction.followup.send(f'{interaction.user.mention}이(가) {self.ctx.author.mention}의 주사위를 굴려 {dice_roll} 가 나왔습니다! 새로운 위치: {new_location_name}')
+                await interaction.followup.send(f'{interaction.user.mention}이(가) {self.ctx.author.mention}의 주사위를 굴려 {dice_roll} 가 나왔습니다! {new_location_name}로 이동했습니다')
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
             else:
                 await interaction.response.send_message('남은 주사위가 없어요 :(', ephemeral=True)
@@ -129,7 +129,7 @@ async def world(ctx):
         user_location_cell = await sheet7.cell(1, user_location_col)
         user_location_name = user_location_cell.value
 
-        embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n{user_location_name}로 이동했습니다", color=discord.Color.blue())
+        embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
 
         message = await ctx.send(embed=embed, view=view)
         try:
