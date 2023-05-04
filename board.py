@@ -93,18 +93,24 @@ class DiceRollView(View):
 
     @discord.ui.button(label='주사위 굴리기', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if interaction.user != self.ctx.author:
+            await interaction.response.send_message("이 버튼은 명령어를 입력한 사용자만 사용할 수 있습니다.", ephemeral=True)
+            return
+
         cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
             cell_value = await self.sheet7.acell(f'B{cell.row}')
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                await interaction.send_response(f'주사위를 굴려 {dice_roll} 가 나왔습니다!', ephemeral=True)  # 수정된 부분
+                await interaction.response.defer(ephemeral=True)  # 추가된 부분
+                await interaction.followup.send(f'주사위를 굴려 {dice_roll} 가 나왔습니다!', ephemeral=True)  # 수정된 부분
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
             else:
-                await interaction.send_response('남은 주사위가 없어요 :(', ephemeral=True)  # 수정된 부분
+                await interaction.response.send_message('남은 주사위가 없어요 :(', ephemeral=True)  # 수정된 부분
         else:
-            await interaction.send_response('등록되지 않은 멤버입니다', ephemeral=True)  # 수정된 부분
+            await interaction.response.send_message('등록되지 않은 멤버입니다', ephemeral=True)  # 수정된 부분
+            
             
 @bot.command(name='보드')
 async def world(ctx):
