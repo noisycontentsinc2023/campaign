@@ -45,45 +45,45 @@ creds_info = {
 }
 credentials = Credentials.from_service_account_info(creds_info, scopes=scope)
 aio_creds = credentials
+  
+async def get_sheet7():
+    client_manager = gspread_asyncio.AsyncioGspreadClientManager(lambda: aio_creds)
+    client = await client_manager.authorize()
+    spreadsheet = await client.open('서버기록')
+    sheet7 = await spreadsheet.worksheet('월드와이드')
+    rows = await sheet7.get_all_values()
+    return sheet7, rows
+  
+async def find_user(user, sheet7):
+    cell = None
+    try:
+        username_with_discriminator = f'{user.name}#{user.discriminator}'
+        cells = await sheet7.findall(username_with_discriminator)
+        if cells:
+            cell = cells[0]
+    except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
+        print(f'find_user error: {e}')
+    return cell
+  
+async def get_user_location(sheet, user_cell):
+    row = user_cell.row
+    for col in range(5, 20):  # E to S columns
+        cell_value = await sheet.cell(row, col).value
+        if cell_value == "1":
+            return col
+    return 5  # Default to column E
 
-async def get_sheet7():
-    client_manager = gspread_asyncio.AsyncioGspreadClientManager(lambda: aio_creds)
-    client = await client_manager.authorize()
-    spreadsheet = await client.open('서버기록')
-    sheet7 = await spreadsheet.worksheet('월드와이드')
-    rows = await sheet7.get_all_values()
-    return sheet7, rows
-  
-async def find_user(user, sheet7):
-    cell = None
-    try:
-        username_with_discriminator = f'{user.name}#{user.discriminator}'
-        cells = await sheet7.findall(username_with_discriminator)
-        if cells:
-            cell = cells[0]
-    except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
-        print(f'find_user error: {e}')
-    return cell
-  
-async def get_sheet7():
-    client_manager = gspread_asyncio.AsyncioGspreadClientManager(lambda: aio_creds)
-    client = await client_manager.authorize()
-    spreadsheet = await client.open('서버기록')
-    sheet7 = await spreadsheet.worksheet('월드와이드')
-    rows = await sheet7.get_all_values()
-    return sheet7, rows
-  
-async def find_user(user, sheet7):
-    cell = None
-    try:
-        username_with_discriminator = f'{user.name}#{user.discriminator}'
-        cells = await sheet7.findall(username_with_discriminator)
-        if cells:
-            cell = cells[0]
-    except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
-        print(f'find_user error: {e}')
-    return cell
-  
+async def update_user_location(sheet, user_cell, steps):
+    current_col = await get_user_location(sheet, user_cell)
+    new_col = current_col + steps
+    if new_col > 19:  # S column
+        new_col = 19
+
+    await sheet.update_cell(user_cell.row, current_col, "0")
+    await sheet.update_cell(user_cell.row, new_col, "1")
+
+    return new_col
+
 class DiceRollView(View):
     def __init__(self, ctx, sheet7):
         super().__init__()
@@ -98,7 +98,11 @@ class DiceRollView(View):
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                await self.ctx.send(f'You rolled a {dice_roll}!')  # 수정된 부분
+                await self.ctx.author.send(f'You rolled a {dice_roll}!')  # 수정된 부분
+                await update_user_location(self.sheet7, cell, dice_roll)
+                new_location_col = await get_user_location(self.sheet7, cell)
+                location_name = await self.sheet7.cell(1, new_location_col).value
+                await self.ctx.author.send(f'Your new location is {location_name}.')  # 수정된 부분
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
             else:
                 await self.ctx.send('There are no dice to roll.')  # 수정된 부분
@@ -114,8 +118,12 @@ async def world(ctx):
         return
 
     cities = rows[1:26]
+    
+    user_info = await sheet7.acell(f'B{user_cell.row}')
+    user_location_col = await get_user_location(sheet7, user_cell)
+    user_location_name = await sheet7.cell(1, user_location_col).value
 
-    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
+    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board\nUsername: {user_info.value}\nCurrent Location: {user_location_name}", color=discord.Color.blue())
     for index, city in enumerate(cities, start=1):
         embed.add_field(name=f"Field {index}", value=city[0], inline=True)
 
