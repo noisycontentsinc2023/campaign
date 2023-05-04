@@ -99,16 +99,12 @@ class DiceRollView(View):
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                await self.ctx.author.send(f'You rolled a {dice_roll}!')  # 수정된 부분
-                await update_user_location(self.sheet7, cell, dice_roll)
-                new_location_col = await get_user_location(self.sheet7, cell)
-                location_name = await self.sheet7.cell(1, new_location_col).value
-                await self.ctx.author.send(f'Your new location is {location_name}.')  # 수정된 부분
+                await interaction.response.send_message(f'주사위를 굴려 {dice_roll} 가 나왔습니다!', ephemeral=True)  # 수정된 부분
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
             else:
-                await self.ctx.send('There are no dice to roll.')  # 수정된 부분
+                await interaction.response.send_message('남은 주사위가 없어요 :(', ephemeral=True)  # 수정된 부분
         else:
-            await self.ctx.send('User not found in the sheet.')  # 수정된 부분
+            await interaction.response.send_message('등록되지 않은 멤버입니다', ephemeral=True)  # 수정된 부분
             
 @bot.command(name='보드')
 async def world(ctx):
