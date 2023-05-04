@@ -138,5 +138,8 @@ async def world(ctx):
         except discord.NotFound:
             # 메시지가 삭제된 경우
             break
+        else:
+            # 메시지 삭제
+            await message.delete()
     
 bot.run(TOKEN)
