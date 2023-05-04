@@ -127,7 +127,7 @@ async def world(ctx):
     user_location_cell = await sheet7.cell(1, user_location_col)
     user_location_name = user_location_cell.value
 
-    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재위치: {user_location_name}", color=discord.Color.blue())
+    embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n{user_location_name}로 이동했습니다", color=discord.Color.blue())
 
     view = DiceRollView(ctx, sheet7)
     await ctx.send(embed=embed, view=view)
