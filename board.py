@@ -89,11 +89,14 @@ class DiceRollView(View):
     def __init__(self, ctx, sheet7):
         super().__init__()
         self.ctx = ctx
-        self.sheet7 = sheet7 
+        self.sheet7 = sheet7
+
+    def is_author(self, interaction):
+        return interaction.user.id == self.ctx.author.id
 
     @discord.ui.button(label='주사위 굴리기', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user.id != self.ctx.author.id:  # Use interaction.user.id
+        if not self.is_author(interaction):
             await interaction.response.send_message("이 버튼은 명령어를 입력한 사용자만 사용할 수 있습니다.", ephemeral=True)
             return
 
