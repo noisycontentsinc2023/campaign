@@ -121,15 +121,22 @@ async def world(ctx):
     if not user_cell:
         await ctx.send("User not found in the sheet.")
         return
-    
-    user_info_cell = await sheet7.acell(f'B{user_cell.row}')
-    user_location_col = await get_user_location(sheet7, user_cell)
-    user_location_cell = await sheet7.cell(1, user_location_col)
-    user_location_name = user_location_cell.value
-
-    embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n{user_location_name}로 이동했습니다", color=discord.Color.blue())
 
     view = DiceRollView(ctx, sheet7)
-    await ctx.send(embed=embed, view=view)
+    while True:
+        user_info_cell = await sheet7.acell(f'B{user_cell.row}')
+        user_location_col = await get_user_location(sheet7, user_cell)
+        user_location_cell = await sheet7.cell(1, user_location_col)
+        user_location_name = user_location_cell.value
+
+        embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n{user_location_name}로 이동했습니다", color=discord.Color.blue())
+
+        message = await ctx.send(embed=embed, view=view)
+        try:
+            await asyncio.sleep(60)  # 1분 대기
+            await message.edit(embed=embed, view=view)  # 임베드와 버튼 갱신
+        except discord.NotFound:
+            # 메시지가 삭제된 경우
+            break
     
 bot.run(TOKEN)
