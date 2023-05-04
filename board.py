@@ -91,7 +91,7 @@ class DiceRollView(View):
         self.ctx = ctx
         self.sheet7 = sheet7 
 
-    @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
+    @discord.ui.button(label='주사위 굴리기', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
         cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
