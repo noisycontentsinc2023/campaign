@@ -65,24 +65,30 @@ async def find_user(user, sheet7):
         print(f'find_user error: {e}')
     return cell
   
-class DiceRollView(discord.ui.View):
+async def get_sheet7():
+    client_manager = gspread_asyncio.AsyncioGspreadClientManager(lambda: aio_creds)
+    client = await client_manager.authorize()
+    spreadsheet = await client.open('서버기록')
+    sheet7 = await spreadsheet.worksheet('월드와이드')
+    rows = await sheet7.get_all_values()
+    return sheet7, rows
+  
+async def find_user(user, sheet7):
+    cell = None
+    try:
+        username_with_discriminator = f'{user.name}#{user.discriminator}'
+        cells = await sheet7.findall(username_with_discriminator)
+        if cells:
+            cell = cells[0]
+    except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
+        print(f'find_user error: {e}')
+    return cell
+  
+class DiceRollView(View):
     def __init__(self, ctx, sheet7):
         super().__init__()
         self.ctx = ctx
-        self.sheet7 = sheet7
-        self.current_field = 1
-        self.original_message = None
-
-    async def update_embed(self):
-        cities = await self.sheet7.get_all_values()
-        cities = cities[1:26]
-        embed = discord.Embed(title="Roll into the world", description=f"{self.ctx.author.mention}'s game board", color=discord.Color.blue())
-        for index, city in enumerate(cities, start=1):
-            if index == self.current_field:
-                embed.add_field(name=f"Field {index} (Current)", value=city[0], inline=True)
-            else:
-                embed.add_field(name=f"Field {index}", value=city[0], inline=True)
-        return embed
+        self.sheet7 = sheet7 
 
     @discord.ui.button(label='Roll the dice', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -92,31 +98,28 @@ class DiceRollView(discord.ui.View):
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                current_position_cell = await self.sheet7.cell(cell.row, 3)
-                current_position = int(current_position_cell.value)  # Cast value to int
-                new_position = current_position + dice_roll
-                await self.sheet7.update_cell(cell.row, 3, new_position)
-                self.current_field = new_position
-                await interaction.response.send_message(f'You rolled a {dice_roll} and moved to Field {new_position}!', ephemeral=True)
-                embed = await self.update_embed()
-                await self.original_message.edit(embed=embed, view=self)
+                await self.ctx.send(f'You rolled a {dice_roll}!')  # 수정된 부분
+                await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
             else:
-                await interaction.response.send_message('There are no dice to roll.', ephemeral=True)
+                await self.ctx.send('There are no dice to roll.')  # 수정된 부분
         else:
-            await interaction.response.send_message('User not found in the sheet.', ephemeral=True)
+            await self.ctx.send('User not found in the sheet.')  # 수정된 부분
             
 @bot.command(name='보드')
 async def world(ctx):
-    sheet7, _ = await get_sheet7()
+    sheet7, rows = await get_sheet7()
     user_cell = await find_user(ctx.author, sheet7)
     if not user_cell:
         await ctx.send("User not found in the sheet.")
         return
 
-    current_cell = await sheet7.cell(user_cell.row, 3)
-    current_field = int(current_cell.value)
+    cities = rows[1:26]
+
+    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board", color=discord.Color.blue())
+    for index, city in enumerate(cities, start=1):
+        embed.add_field(name=f"Field {index}", value=city[0], inline=True)
+
     view = DiceRollView(ctx, sheet7)
-    view.current_field = current_field
-    embed = await view.update_embed()
-    view.original_message = await ctx.send(embed=embed, view=view)
+    await ctx.send(embed=embed, view=view)
+    
 bot.run(TOKEN)
