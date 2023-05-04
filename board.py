@@ -99,12 +99,12 @@ class DiceRollView(View):
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
-                await interaction.response.send_message(f'주사위를 굴려 {dice_roll} 가 나왔습니다!', ephemeral=True)  # 수정된 부분
+                await interaction.send_response(f'주사위를 굴려 {dice_roll} 가 나왔습니다!', ephemeral=True)  # 수정된 부분
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
             else:
-                await interaction.response.send_message('남은 주사위가 없어요 :(', ephemeral=True)  # 수정된 부분
+                await interaction.send_response('남은 주사위가 없어요 :(', ephemeral=True)  # 수정된 부분
         else:
-            await interaction.response.send_message('등록되지 않은 멤버입니다', ephemeral=True)  # 수정된 부분
+            await interaction.send_response('등록되지 않은 멤버입니다', ephemeral=True)  # 수정된 부분
             
 @bot.command(name='보드')
 async def world(ctx):
