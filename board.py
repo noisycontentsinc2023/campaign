@@ -117,17 +117,13 @@ async def world(ctx):
     if not user_cell:
         await ctx.send("User not found in the sheet.")
         return
-
-    cities = rows[1:26]
     
     user_info_cell = await sheet7.acell(f'B{user_cell.row}')
     user_location_col = await get_user_location(sheet7, user_cell)
     user_location_cell = await sheet7.cell(1, user_location_col)
     user_location_name = user_location_cell.value
 
-    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board\nUsername: {user_info_cell.value}\nCurrent Location: {user_location_name}", color=discord.Color.blue())
-    for index, city in enumerate(cities, start=1):
-        embed.add_field(name=f"Field {index}", value=city[0], inline=True)
+    embed = discord.Embed(title="Roll into the world", description=f"{ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재위치: {user_location_name}", color=discord.Color.blue())
 
     view = DiceRollView(ctx, sheet7)
     await ctx.send(embed=embed, view=view)
