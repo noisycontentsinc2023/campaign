@@ -106,7 +106,7 @@ class DiceRollView(View):
                 new_location_cell = await self.sheet7.cell(1, new_location_col)
                 new_location_name = new_location_cell.value
 
-                await interaction.followup.send(f'주사위를 굴려 {dice_roll} 가 나왔습니다! 새로운 위치: {new_location_name}', ephemeral=True)  # 수정된 부분
+                await interaction.followup.send(f'{interaction.user.mention}이 {author.user.mention}의 주사위를 굴려 {dice_roll} 가 나왔습니다! 새로운 위치: {new_location_name}') # 수정된 부분
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
             else:
                 await interaction.response.send_message('남은 주사위가 없어요 :(', ephemeral=True)  # 수정된 부분
