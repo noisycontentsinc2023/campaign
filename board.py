@@ -93,9 +93,6 @@ class DiceRollView(View):
 
     @discord.ui.button(label='주사위 굴리기', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, interaction: discord.Interaction, button: discord.ui.Button):
-        dice_roll = random.randint(1, 6)
-        embed = discord.Embed(title="주사위 결과", description=f"{button.user.mention}가 {self.ctx.author.mention}의 주사위를 굴렸습니다.\n결과: {dice_roll}", color=discord.Color.blue())
-        await interaction.response.send_message(embed=embed)
 
         cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
