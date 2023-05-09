@@ -163,27 +163,30 @@ async def world(ctx):
     view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
     await message.edit(embed=embed, view=view) 
 
+async def get_column_values(sheet, col_index):
+    column = []
+    for row in range(1, sheet.row_count):
+        cell = await sheet.cell(row, col_index)
+        if cell.value:
+            column.append(cell.value)
+    return column
+
 async def get_random_missions(sheet):
-    max_row = min(sheet.row_count, 100)  # 최대 100행까지만 참고하도록 변경
+    max_row = min(sheet.row_count, 100)
     max_col = sheet.col_count
-    available_cols = list(range(1, 4)) + list(range(5, max_col + 1))  # Create a list of available columns, excluding column 4 (D)
+    available_cols = list(range(1, 4)) + list(range(5, max_col + 1))
+
+    mission_col = await get_column_values(sheet, 4)  # D열의 값을 가져옴
 
     missions = []
     while len(missions) < 3:
-        random_row = random.randint(2, max_row)  # Randomly select a row
-        col = random.choice(available_cols)  # Randomly select a column from the available columns
+        random_row = random.randint(2, max_row)
+        col = random.choice(available_cols)
         cell = await sheet.cell(random_row, col)
-        if cell.value and cell.value not in missions:
+        if cell.value and cell.value not in missions and cell.value not in mission_col:
             missions.append(cell.value)
 
     return missions
-  
-class MissionView(discord.ui.View):
-    def __init__(self, ctx, sheet7, missions):
-        super().__init__()
-        self.ctx = ctx
-        self.sheet7 = sheet7
-        self.missions = missions
 
     @discord.ui.button(emoji="1️⃣")
     async def mission_one(self, button: discord.ui.Button, interaction: discord.Interaction):
