@@ -164,7 +164,7 @@ async def world(ctx):
     await message.edit(embed=embed, view=view) 
 
 async def get_random_missions(sheet):
-    max_row = sheet.row_count
+    max_row = min(sheet.row_count, 100)  # 최대 100행까지만 참고하도록 변경
     max_col = sheet.col_count
     available_cols = list(range(1, 4)) + list(range(5, max_col + 1))  # Create a list of available columns, excluding column 4 (D)
 
