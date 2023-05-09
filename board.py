@@ -110,8 +110,9 @@ class DiceRollView(View):
             description=f"{self.ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}\n완주 횟수: {completed_laps}",
             color=discord.Color.blue()
         )
-        await self.message.delete()  # 기존 메시지 삭제
+        await self.message.delete(delay=180)  # 기존 메시지 삭제
         self.message = await self.ctx.send(embed=embed, view=self)
+        await self.message.delete(delay=180)  # 새 메시지 삭제
 
     @discord.ui.button(label='주사위 굴리기', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -158,6 +159,7 @@ async def world(ctx):
 
     embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'님의 \n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
     message = await ctx.send(embed=embed)
+    await message.delete(delay=180)  # 3분 후에 삭제
     view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
     await message.edit(embed=embed, view=view) 
     
