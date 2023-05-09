@@ -108,7 +108,6 @@ class DiceRollView(View):
 
     @discord.ui.button(label='주사위 굴리기', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, interaction: discord.Interaction, button: discord.ui.Button):
-        interaction.timeout = 10
         
         cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
