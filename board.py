@@ -79,9 +79,9 @@ async def update_user_location(sheet, user_cell, steps):
     new_col = current_col + steps
     completed_laps = 0
 
-    if new_col > 31:  # AE열
-        completed_laps = (new_col - 31) // 27  # 완주 횟수 계산
-        new_col = ((new_col - 32) % 27) + 5  # 초과된 숫자만큼 E열에 숫자를 더해 이동
+    while new_col > 31:  # AE열
+        completed_laps += 1  # 완주 횟수를 1 증가시킵니다.
+        new_col = new_col - 27  # E열로 돌아가게 합니다.
 
     await sheet.update_cell(user_cell.row, current_col, "0")
     await sheet.update_cell(user_cell.row, new_col, "1")
@@ -108,7 +108,8 @@ class DiceRollView(View):
 
     @discord.ui.button(label='주사위 굴리기', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, interaction: discord.Interaction, button: discord.ui.Button):
-
+        interaction.timeout = 10
+        
         cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
             cell_value = await self.sheet7.acell(f'B{cell.row}')
