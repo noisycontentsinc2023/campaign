@@ -93,12 +93,13 @@ class DiceRollView(View):
         self.message = message
 
     async def update_message(self):
-        user_info_cell = await self.sheet7.acell(f'B{self.message.author.row}')
-        user_location_col = await get_user_location(self.sheet7, self.message.author)
+        cell = await find_user(self.ctx.author, self.sheet7)  # cell 변수 추가
+        user_info_cell = await self.sheet7.acell(f'B{cell.row}')  # self.message.author.row를 cell.row로 변경
+        user_location_col = await get_user_location(self.sheet7, cell)
         user_location_cell = await self.sheet7.cell(1, user_location_col)
         user_location_name = user_location_cell.value
 
-        embed = discord.Embed(title="굴려서 세상속으로", description=f"{self.ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
+        embed = discord.Embed(title="굴려서 세상속으로", description=f"{self.ctx.author.mention}'님의 정보입니다\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
         await self.message.delete()  # 기존 메시지 삭제
         self.message = await self.ctx.send(embed=embed, view=self.message.view)  # 새 메시지 작성 후 self.message 업데이트
 
@@ -138,7 +139,7 @@ async def world(ctx):
     user_location_cell = await sheet7.cell(1, user_location_col)
     user_location_name = user_location_cell.value
 
-    embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
+    embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'님의 \n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
     message = await ctx.send(embed=embed)
     view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
     await message.edit(embed=embed, view=view) 
