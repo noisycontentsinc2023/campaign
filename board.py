@@ -163,4 +163,36 @@ async def world(ctx):
     view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
     await message.edit(embed=embed, view=view) 
     
+class MissionView(discord.ui.View):
+    def __init__(self, ctx, sheet7, missions):
+        super().__init__()
+        self.ctx = ctx
+        self.sheet7 = sheet7
+        self.missions = missions
+
+    @discord.ui.button(emoji="1️⃣")
+    async def mission_one(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.send_message(self.missions[0], ephemeral=True)
+
+    @discord.ui.button(emoji="2️⃣")
+    async def mission_two(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.send_message(self.missions[1], ephemeral=True)
+
+    @discord.ui.button(emoji="3️⃣")
+    async def mission_three(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.send_message(self.missions[2], ephemeral=True)
+
+@bot.command(name="미션")
+async def mission(ctx):
+    sheet7, _ = await get_sheet7()
+    missions = await get_random_missions(sheet7)
+    mission_previews = [mission[:4] + "..." for mission in missions]
+
+    embed = discord.Embed(title="Missions", description="Select a mission to view its full text.", color=discord.Color.blue())
+    for idx, preview in enumerate(mission_previews, start=1):
+        embed.add_field(name=f"Mission {idx}", value=preview, inline=False)
+
+    view = MissionView(ctx, sheet7, missions)
+    await ctx.send(embed=embed, view=view)
+    
 bot.run(TOKEN)
