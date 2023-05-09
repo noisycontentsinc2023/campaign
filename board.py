@@ -171,7 +171,8 @@ class MissionView(discord.ui.View):
 
     async def send_mission(self, interaction, mission):
         embed = discord.Embed(title="Mission", description=mission, color=discord.Color.blue())
-        await interaction.response.send(embed=embed, ephemeral=True)
+        await interaction.response.defer(ephemeral=True)
+        await interaction.followup.send(embed=embed, ephemeral=True)
 
     @discord.ui.button(emoji="1️⃣")
     async def mission_one(self, button: discord.ui.Button, interaction: discord.Interaction):
