@@ -102,7 +102,14 @@ class DiceRollView(View):
         user_location_cell = await self.sheet7.cell(1, user_location_col)
         user_location_name = user_location_cell.value
 
-        embed = discord.Embed(title="굴려서 세상속으로", description=f"{self.ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
+        lap_cell = await self.sheet7.acell(f'C{cell.row}')
+        completed_laps = lap_cell.value
+
+        embed = discord.Embed(
+            title="굴려서 세상속으로",
+            description=f"{self.ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}\n완주 횟수: {completed_laps}",
+            color=discord.Color.blue()
+        )
         await self.message.delete()  # 기존 메시지 삭제
         self.message = await self.ctx.send(embed=embed, view=self)
 
@@ -149,7 +156,7 @@ async def world(ctx):
     user_location_cell = await sheet7.cell(1, user_location_col)
     user_location_name = user_location_cell.value
 
-    embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'님의 \n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}\n완주 횟수: {completed_laps}", color=discord.Color.blue())
+    embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'님의 \n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
     message = await ctx.send(embed=embed)
     view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
     await message.edit(embed=embed, view=view) 
