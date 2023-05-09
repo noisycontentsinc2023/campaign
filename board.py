@@ -67,7 +67,7 @@ async def find_user(user, sheet7):
   
 async def get_user_location(sheet, user_cell):
     row = user_cell.row
-    for col in range(5, 20):  # E to S columns
+    for col in range(5, 32):  # E 부터 AE 열
         cell = await sheet.cell(row, col)
         cell_value = cell.value
         if cell_value == "1":
@@ -77,8 +77,8 @@ async def get_user_location(sheet, user_cell):
 async def update_user_location(sheet, user_cell, steps):
     current_col = await get_user_location(sheet, user_cell)
     new_col = current_col + steps
-    if new_col > 19:  # S column
-        new_col = 19
+    if new_col > 31:  # AE열
+        new_col = 31
 
     await sheet.update_cell(user_cell.row, current_col, "0")
     await sheet.update_cell(user_cell.row, new_col, "1")
@@ -86,10 +86,20 @@ async def update_user_location(sheet, user_cell, steps):
     return new_col
 
 class DiceRollView(View):
-    def __init__(self, ctx, sheet7):
+    def __init__(self, ctx, sheet7, message):
         super().__init__()
         self.ctx = ctx
         self.sheet7 = sheet7
+        self.message = message
+
+    async def update_message(self):
+        user_info_cell = await self.sheet7.acell(f'B{self.message.author.row}')
+        user_location_col = await get_user_location(self.sheet7, self.message.author)
+        user_location_cell = await self.sheet7.cell(1, user_location_col)
+        user_location_name = user_location_cell.value
+
+        embed = discord.Embed(title="굴려서 세상속으로", description=f"{self.ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
+        await self.message.edit(embed=embed)
 
     @discord.ui.button(label='주사위 굴리기', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -108,11 +118,11 @@ class DiceRollView(View):
 
                 await interaction.followup.send(f'{interaction.user.mention}이(가) {self.ctx.author.mention}의 주사위를 굴려 {dice_roll} 가 나왔습니다! {new_location_name}로 이동했습니다')
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
+                await self.update_message()  # 메시지를 갱신
             else:
                 await interaction.response.send_message('남은 주사위가 없어요 :(', ephemeral=True)
         else:
             await interaction.response.send_message('등록되지 않은 멤버입니다', ephemeral=True)
-            
             
 @bot.command(name='보드')
 async def world(ctx):
