@@ -162,7 +162,20 @@ async def world(ctx):
     await message.delete(delay=180)  # 3분 후에 삭제
     view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
     await message.edit(embed=embed, view=view) 
-    
+
+async def get_random_missions(sheet):
+    max_row = sheet.row_count
+    max_col = sheet.col_count
+    selected_rows = random.sample(range(2, max_row + 1), 3)  # Randomly select 3 rows, starting from row 2
+
+    missions = []
+    for row in selected_rows:
+        col = random.choice(range(1, 4) + list(range(5, max_col + 1)))  # Randomly select a column, excluding column 4 (D)
+        cell = await sheet.cell(row, col)
+        missions.append(cell.value)
+
+    return missions
+  
 class MissionView(discord.ui.View):
     def __init__(self, ctx, sheet7, missions):
         super().__init__()
