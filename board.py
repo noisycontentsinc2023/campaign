@@ -169,17 +169,21 @@ class MissionView(discord.ui.View):
         super().__init__()
         self.missions = missions
 
+    async def send_mission(self, interaction, mission):
+        embed = discord.Embed(title="Mission", description=mission, color=discord.Color.blue())
+        await interaction.response.send(embed=embed, ephemeral=True)
+
     @discord.ui.button(emoji="1️⃣")
     async def mission_one(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message(self.missions[0], ephemeral=True)
+        await self.send_mission(interaction, self.missions[0])
 
     @discord.ui.button(emoji="2️⃣")
     async def mission_two(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message(self.missions[1], ephemeral=True)
+        await self.send_mission(interaction, self.missions[1])
 
     @discord.ui.button(emoji="3️⃣")
     async def mission_three(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message(self.missions[2], ephemeral=True)
+        await self.send_mission(interaction, self.missions[2])
 
 
 async def get_column_values(sheet, col):
@@ -208,7 +212,7 @@ async def get_random_missions(sheet):
 async def mission(ctx):
     sheet7, _ = await get_sheet7()
     missions = await get_random_missions(sheet7)
-    mission_previews = [mission[:4] + "..." for mission in missions]
+    mission_previews = [mission[:6] + "..." for mission in missions]
 
     embed = discord.Embed(title="Missions", description="Select a mission to view its full text.", color=discord.Color.blue())
     for idx, preview in enumerate(mission_previews, start=1):
