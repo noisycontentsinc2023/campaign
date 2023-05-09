@@ -163,20 +163,10 @@ async def world(ctx):
     view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
     await message.edit(embed=embed, view=view) 
 
-async def get_random_missions(sheet):
-    max_row = min(sheet.row_count, 100)
-    max_col = sheet.col_count
-
-    mission_col = await get_column_values(sheet, 3)  # D열의 값을 가져옴
-
-    missions = []
-    while len(missions) < 3:
-        random_row = random.randint(2, max_row)
-        cell = await sheet.cell(random_row, 4)  # D열에 해당하는 열 인덱스는 4
-        if cell.value and cell.value not in missions and cell.value not in mission_col:
-            missions.append(cell.value)
-
-    return missions
+class MissionView(discord.ui.View):
+    def __init__(self, missions):
+        super().__init__()
+        self.missions = missions
 
     @discord.ui.button(emoji="1️⃣")
     async def mission_one(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -190,6 +180,27 @@ async def get_random_missions(sheet):
     async def mission_three(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.send_message(self.missions[2], ephemeral=True)
 
+
+async def get_column_values(sheet, col):
+    return [cell.value for cell in await sheet.get_col(col, returnas="cell")]
+
+
+async def get_random_missions(sheet):
+    max_row = min(sheet.row_count, 100)
+    max_col = sheet.col_count
+
+    mission_col = await get_column_values(sheet, 4)  # D열의 값을 가져옴
+
+    missions = []
+    while len(missions) < 3:
+        random_row = random.randint(2, max_row)
+        cell = await sheet.cell(random_row, 4)  # D열에 해당하는 열 인덱스는 4
+        if cell.value and cell.value not in missions and cell.value not in mission_col:
+            missions.append(cell.value)
+
+    return missions
+
+
 @bot.command(name="미션")
 async def mission(ctx):
     sheet7, _ = await get_sheet7()
@@ -200,7 +211,7 @@ async def mission(ctx):
     for idx, preview in enumerate(mission_previews, start=1):
         embed.add_field(name=f"Mission {idx}", value=preview, inline=False)
 
-    view = MissionView(ctx, sheet7, missions)
+    view = MissionView(missions)
     await ctx.send(embed=embed, view=view)
     
 bot.run(TOKEN)
