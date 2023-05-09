@@ -132,25 +132,15 @@ async def world(ctx):
         await ctx.send("User not found in the sheet.")
         return
 
-    view = DiceRollView(ctx, sheet7)
-    message = None  # 초기 메시지를 None으로 설정
-    while True:
-        user_info_cell = await sheet7.acell(f'B{user_cell.row}')
-        user_location_col = await get_user_location(sheet7, user_cell)
-        user_location_cell = await sheet7.cell(1, user_location_col)
-        user_location_name = user_location_cell.value
+    user_info_cell = await sheet7.acell(f'B{user_cell.row}')
+    user_location_col = await get_user_location(sheet7, user_cell)
+    user_location_cell = await sheet7.cell(1, user_location_col)
+    user_location_name = user_location_cell.value
 
-        embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
-
-        if message:
-            await message.delete()  # 이전 메시지가 있다면 삭제
-
-        message = await ctx.send(embed=embed, view=view)  # 새로운 메시지를 보냄
-        try:
-            await asyncio.sleep(60)  # 1분 대기
-        except discord.NotFound:
-            # 메시지가 삭제된 경우
-            break
-    await message.delete()
+    embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
+    message = await ctx.send(embed=embed)
+    view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
+    message.view = view  # view에 message를 추가
+    await message.edit(view=view)
     
 bot.run(TOKEN)
