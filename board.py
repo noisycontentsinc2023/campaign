@@ -140,7 +140,6 @@ async def world(ctx):
     embed = discord.Embed(title="굴려서 세상속으로", description=f"{ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
     message = await ctx.send(embed=embed)
     view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
-    message.view = view  # view에 message를 추가
-    await message.edit(view=view)
+    await message.edit(embed=embed, view=view) 
     
 bot.run(TOKEN)
