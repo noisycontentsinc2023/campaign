@@ -164,7 +164,8 @@ async def world(ctx):
     await message.edit(embed=embed, view=view) 
 
 async def get_random_missions(sheet):
-    max_row, max_col = await sheet.get_dimensions()
+    max_row = sheet.row_count
+    max_col = sheet.col_count
     available_cols = list(range(1, 4)) + list(range(5, max_col + 1))  # Create a list of available columns, excluding column 4 (D)
     random_rows = random.sample(range(2, max_row + 1), 3)  # Randomly select three unique rows
     
