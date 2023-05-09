@@ -99,7 +99,8 @@ class DiceRollView(View):
         user_location_name = user_location_cell.value
 
         embed = discord.Embed(title="굴려서 세상속으로", description=f"{self.ctx.author.mention}'s game board\n남은 주사위: {user_info_cell.value}\n현재 위치: {user_location_name}", color=discord.Color.blue())
-        await self.message.edit(embed=embed)
+        await self.message.delete()  # 기존 메시지 삭제
+        self.message = await self.ctx.send(embed=embed, view=self.message.view)  # 새 메시지 작성 후 self.message 업데이트
 
     @discord.ui.button(label='주사위 굴리기', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, interaction: discord.Interaction, button: discord.ui.Button):
