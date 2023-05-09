@@ -77,13 +77,16 @@ async def get_user_location(sheet, user_cell):
 async def update_user_location(sheet, user_cell, steps):
     current_col = await get_user_location(sheet, user_cell)
     new_col = current_col + steps
+    completed_laps = 0
+
     if new_col > 31:  # AE열
-        new_col = 31
+        completed_laps = (new_col - 31) // 27  # 완주 횟수 계산
+        new_col = ((new_col - 32) % 27) + 5  # 초과된 숫자만큼 E열에 숫자를 더해 이동
 
     await sheet.update_cell(user_cell.row, current_col, "0")
     await sheet.update_cell(user_cell.row, new_col, "1")
 
-    return new_col
+    return new_col, completed_laps
 
 class DiceRollView(View):
     def __init__(self, ctx, sheet7, message):
@@ -114,11 +117,18 @@ class DiceRollView(View):
                 dice_roll = random.randint(1, 6)
                 await interaction.response.defer(ephemeral=True)
                 
-                new_location_col = await update_user_location(self.sheet7, cell, dice_roll)  # 위치 업데이트
+                new_location_col, completed_laps = await update_user_location(self.sheet7, cell, dice_roll)  # 위치 업데이트
                 new_location_cell = await self.sheet7.cell(1, new_location_col)
                 new_location_name = new_location_cell.value
 
-                await interaction.followup.send(f'{interaction.user.mention}이(가) {self.ctx.author.mention}의 주사위를 굴려 {dice_roll} 가 나왔습니다! {new_location_name}로 이동했습니다. 남은 주사위 횟수: {dice_count - 1}')
+                if completed_laps > 0:
+                    lap_cell = await self.sheet7.acell(f'C{cell.row}')
+                    total_laps = int(lap_cell.value) + completed_laps
+                    await self.sheet7.update_cell(cell.row, 3, total_laps)
+                    await interaction.followup.send(f'{interaction.user.mention}이(가) {self.ctx.author.mention}의 주사위를 굴려 {dice_roll} 가 나왔습니다! 축하합니다! {completed_laps}번 완주하셨습니다. 총 완주 횟수: {total_laps}')
+                else:
+                    await interaction.followup.send(f'{interaction.user.mention}이(가) {self.ctx.author.mention}의 주사위를 굴려 {dice_roll} 가 나왔습니다! {new_location_name}로 이동했습니다. 남은 주사위 횟수: {dice_count - 1}')
+    
                 await self.sheet7.update_cell(cell.row, 2, dice_count - 1)
                 await self.update_message()  # 메시지를 갱신
             else:
