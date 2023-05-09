@@ -134,7 +134,7 @@ class DiceRollView(View):
                     lap_cell = await self.sheet7.acell(f'C{cell.row}')
                     total_laps = int(lap_cell.value) + completed_laps
                     await self.sheet7.update_cell(cell.row, 3, total_laps)
-                    await interaction.followup.send(f'{interaction.user.mention}이(가) {self.ctx.author.mention}의 주사위를 굴려 {dice_roll} 가 나왔습니다! 축하합니다! {completed_laps}번 완주하셨습니다. 총 완주 횟수: {total_laps}')
+                    await interaction.followup.send(f'{interaction.user.mention}이(가) {self.ctx.author.mention}의 주사위를 굴려 {dice_roll} 가 나왔습니다! 축하합니다! 완주하셨습니다. 총 완주 횟수: {total_laps}')
                 else:
                     await interaction.followup.send(f'{interaction.user.mention}이(가) {self.ctx.author.mention}의 주사위를 굴려 {dice_roll} 가 나왔습니다! {new_location_name}로 이동했습니다. 남은 주사위 횟수: {dice_count - 1}')
     
