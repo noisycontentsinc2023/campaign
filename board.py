@@ -164,28 +164,6 @@ async def world(ctx):
     view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
     await message.edit(embed=embed, view=view) 
 
-class MissionView(discord.ui.View):
-    def __init__(self, missions):
-        super().__init__()
-        self.missions = missions
-
-    async def send_mission(self, interaction, mission):
-        embed = discord.Embed(title="Mission", description=mission, color=discord.Color.blue())
-        await interaction.response.defer(ephemeral=True)
-        await interaction.followup.send(embed=embed, ephemeral=True)
-
-    @discord.ui.button(emoji="1️⃣")
-    async def mission_one(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await self.send_mission(interaction, self.missions[0])
-
-    @discord.ui.button(emoji="2️⃣")
-    async def mission_two(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await self.send_mission(interaction, self.missions[1])
-
-    @discord.ui.button(emoji="3️⃣")
-    async def mission_three(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await self.send_mission(interaction, self.missions[2])
-
 
 async def get_column_values(sheet, col):
     col_letter = gspread.utils.rowcol_to_a1(1, col)
@@ -219,7 +197,25 @@ async def mission(ctx):
     for idx, preview in enumerate(mission_previews, start=1):
         embed.add_field(name=f"Mission {idx}", value=preview, inline=False)
 
-    view = MissionView(missions)
-    await ctx.send(embed=embed, view=view)
+    message = await ctx.send(embed=embed)
+
+    # Add reactions to the message
+    for emoji in ["1️⃣", "2️⃣", "3️⃣"]:
+        await message.add_reaction(emoji)
+
+    def check(reaction, user):
+        return user == ctx.author and str(reaction.emoji) in ["1️⃣", "2️⃣", "3️⃣"]
+
+    try:
+        reaction, _ = await bot.wait_for("reaction_add", timeout=60.0, check=check)
+    except asyncio.TimeoutError:
+        await ctx.send("No reaction added within 60 seconds. Mission selection timed out.", delete_after=10)
+    else:
+        if str(reaction.emoji) == "1️⃣":
+            await ctx.send(missions[0])
+        elif str(reaction.emoji) == "2️⃣":
+            await ctx.send(missions[1])
+        elif str(reaction.emoji) == "3️⃣":
+            await ctx.send(missions[2])
     
 bot.run(TOKEN)
