@@ -112,6 +112,7 @@ class DiceRollView(View):
             dice_count = int(cell_value.value)
             if dice_count > 0:
                 dice_roll = random.randint(1, 6)
+                await interaction.response.defer(ephemeral=True)
                 
                 new_location_col = await update_user_location(self.sheet7, cell, dice_roll)  # 위치 업데이트
                 new_location_cell = await self.sheet7.cell(1, new_location_col)
