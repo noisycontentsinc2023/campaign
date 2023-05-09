@@ -182,7 +182,7 @@ class MissionView(discord.ui.View):
 
 
 async def get_column_values(sheet, col):
-    col_letter = gspread.utils.rowcol_to_a1(1, col)
+    col_letter = gspread_asyncio.rowcol_to_a1(1, col)
     data = await sheet.get(f'{col_letter}1:{col_letter}{sheet.row_count}')
     return [cell[0] for cell in data]
 
