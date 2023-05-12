@@ -218,6 +218,26 @@ async def mission(ctx):
         elif str(reaction.emoji) == "3️⃣":
             await ctx.send(missions[2])
 
+            
+# Set up Google Sheets worksheet
+async def get_sheet8():
+    client_manager = gspread_asyncio.AsyncioGspreadClientManager(lambda: aio_creds)
+    client = await client_manager.authorize()
+    spreadsheet = await client.open('서버기록')
+    sheet8 = await spreadsheet.worksheet('슬독생')
+    rows = await sheet8.get_all_values()
+    return sheet8, rows 
+
+async def find_user(username, sheet):
+    cell = None
+    try:
+        cells = await sheet.findall(username)
+        if cells:
+            cell = cells[0]
+    except gspread.exceptions.APIError as e:
+        print(f'find_user error: {e}')
+    return cell
+
 @bot.command(name='슬독생출석')
 async def sul_attendance(ctx):
     kst = pytz.timezone('Asia/Seoul')
