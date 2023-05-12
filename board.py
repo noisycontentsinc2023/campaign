@@ -254,7 +254,7 @@ async def sul_attendance(ctx):
     user_index = existing_users.index(str(ctx.author)) + 1
     existing_dates = await sheet8.row_values(1)
 
-    start_date = datetime.datetime(year=now.year, month=5, day=8)
+    start_date = datetime(year=now.year, month=5, day=8)
     missing_dates = []
     for i in range((now - start_date).days + 1):
         date = (start_date + datetime.timedelta(days=i)).strftime('%m%d')
