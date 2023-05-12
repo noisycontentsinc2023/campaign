@@ -211,12 +211,21 @@ async def mission(ctx):
     except asyncio.TimeoutError:
         await ctx.send("No reaction added within 60 seconds. Mission selection timed out.", delete_after=10)
     else:
+        selected_mission = ""
         if str(reaction.emoji) == "1️⃣":
-            await ctx.send(missions[0])
+            selected_mission = missions[0]
         elif str(reaction.emoji) == "2️⃣":
-            await ctx.send(missions[1])
+            selected_mission = missions[1]
         elif str(reaction.emoji) == "3️⃣":
-            await ctx.send(missions[2])
+            selected_mission = missions[2]
+
+        # Create an embed message for the selected mission
+        embed = discord.Embed(
+            title="Selected Mission",
+            description=f"{ctx.author.mention}님, 선택하신 미션은 아래와 같습니다:\n{selected_mission}",
+            color=discord.Color.blue()
+        )
+        await ctx.send(embed=embed)
 
     
 bot.run(TOKEN)
