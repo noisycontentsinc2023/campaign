@@ -257,7 +257,7 @@ async def sul_attendance(ctx):
     start_date = datetime(year=now.year, month=5, day=8)
     missing_dates = []
     for i in range((now - start_date).days + 1):
-        date = (start_date + datetime.timedelta(days=i)).strftime('%m%d')
+        date = (start_date + timedelta(days=i)).strftime('%m%d')
         if date not in existing_dates:
             missing_dates.append(date)
         else:
