@@ -260,7 +260,7 @@ async def sul_attendance(ctx):
         date = (start_date + timedelta(days=i)).strftime('%m%d')
         if date not in existing_dates:
             missing_dates.append(date)
-        else:
+        elif date <= today1:  # Only consider dates up to today
             date_index = existing_dates.index(date) + 1
             cell_value = await sheet8.cell(user_index, date_index)
             if not cell_value.value:
@@ -272,8 +272,6 @@ async def sul_attendance(ctx):
     overall_sul = await sheet8.cell(user_index, 2)  # Read the value of column B
     attendance_rate = attended_days / total_days * 100 if total_days > 0 else 0
 
-    missing_dates_str = ', '.join(missing_dates)
-    
     if missing_dates:
         missing_dates_str = ', '.join(missing_dates)
         message = f"{ctx.author.mention}님, {missing_dates_str} 에 출석하지 않으셨습니다. " \
