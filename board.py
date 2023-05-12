@@ -266,18 +266,14 @@ async def sul_attendance(ctx):
             if not cell_value.value:
                 missing_dates.append(date)
 
-    total_days = len(missing_dates) + len(existing_dates) - 1  # Subtract one for the header row
-    attended_days = total_days - len(missing_dates)
-
-    overall_sul = await sheet8.cell(user_index, 2)  # Read the value of column B
-    attendance_rate = attended_days / total_days * 100 if total_days > 0 else 0
+    attendance_rate = await sheet8.cell(user_index, 3)  # Load the value from column C
 
     if missing_dates:
         missing_dates_str = ', '.join(missing_dates)
         message = f"{ctx.author.mention}님, {missing_dates_str} 에 출석하지 않으셨습니다. " \
-                  f"현재까지의 누적 출석률은 {attendance_rate:.2f}% 입니다."
+                  f"현재까지의 누적 출석률은 {attendance_rate.value}% 입니다."
     else:
-        message = f"{ctx.author.mention}, 오늘 날짜기준으로 전체 출석하셨습니다. 현재까지의 누적 출석률은 {attendance_rate:.2f}% 입니다."
+        message = f"{ctx.author.mention}, 오늘 날짜기준으로 전체 출석하셨습니다. 현재까지의 누적 출석률은 {attendance_rate.value}% 입니다."
 
     await ctx.send(message)
     
