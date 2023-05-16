@@ -330,7 +330,7 @@ class Shop(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.items = [
-            {"name": "Item 1", "role_id": "1107912106201841735", "cost": 10},
+            {"name": "Item 1", "role_id": "1107916119957844038", "cost": 10},
             {"name": "Item 2", "role_id": "ROLE_ID_2", "cost": 20},
             {"name": "Item 3", "role_id": "ROLE_ID_3", "cost": 30},
         ]
@@ -349,7 +349,7 @@ class Shop(commands.Cog):
 
         # Get user points from Google Sheets
         user_points = None
-        records = sheet.get_all_records()
+        records = sheet8.get_all_records()
         for row in records:
             if str(row['User ID']) == user_id:
                 user_points = int(row['Points'])
@@ -376,7 +376,7 @@ class Shop(commands.Cog):
         if str(reaction.emoji) == '✅':
             # Deduct points and assign role
             new_points = user_points - item['cost']
-            sheet.update_cell(row['Row Number'], 2, new_points)  # Assume 'Row Number' column exists and stores the row number in the sheet
+            sheet8.update_cell(row['Row Number'], 2, new_points)  # Assume 'Row Number' column exists and stores the row number in the sheet
             role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
             await ctx.author.add_roles(role)
             await ctx.send("Purchase successful! Your new points balance is: " + str(new_points), ephemeral=True)
