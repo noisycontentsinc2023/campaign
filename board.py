@@ -268,7 +268,6 @@ class AuthButton(discord.ui.Button):
             await sheet8.update_cell(index, 2, str(current_count + 1))  # Increment the count
         await interaction.message.edit(embed=discord.Embed(title="인증상황", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}를 인증했습니다🥳"), view=None)
         self.stop_loop = True
-        await update_count(sheet8, interaction.user)
         
 class CancelButton(discord.ui.Button):
     def __init__(self, ctx):
@@ -327,14 +326,14 @@ items = [
     {"name": "Item 3", "role_id": "ROLE_ID_3", "cost": 30},
 ]
 
-@bot.command()
+@bot.command(name='상점')
 async def shop(ctx):
     embed = discord.Embed(title="Welcome to the store", description=f"{ctx.author.mention}, choose the product you want!")
     for i, item in enumerate(items):
         embed.add_field(name=f"Item {i}", value=f"Cost: {item['cost']}", inline=False)
     await ctx.send(embed=embed)
 
-@bot.command()
+@bot.command(name='구매')
 async def buy(ctx, item_number: int):
     item = items[item_number]
 
