@@ -326,57 +326,57 @@ async def Authentication(ctx):
 
     await bot.wait_for("interaction", check=check)
 
-class Shop(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.items = [
-            {"name": "Item 1", "role_id": "1107916119957844038", "cost": 10},
-            {"name": "Item 2", "role_id": "ROLE_ID_2", "cost": 20},
-            {"name": "Item 3", "role_id": "ROLE_ID_3", "cost": 30},
-        ]
+    
 
-    @commands.command()
-    async def shop(self, ctx):
-        embed = discord.Embed(title="Welcome to the store", description=f"{ctx.author.mention}, choose the product you want!")
-        for i, item in enumerate(self.items):
-            embed.add_field(name=f"Item {i}", value=f"Cost: {item['cost']}", inline=False)
-        await ctx.send(embed=embed)
 
-    @commands.command()
-    async def buy(self, ctx, item_number: int):
-        item = self.items[item_number]
+items = [
+    {"name": "Item 1", "role_id": "1107916119957844038", "cost": 10},
+    {"name": "Item 2", "role_id": "ROLE_ID_2", "cost": 20},
+    {"name": "Item 3", "role_id": "ROLE_ID_3", "cost": 30},
+]
 
-        # Get user points from Google Sheets
-        sheet8, _ = await get_sheet8()
-        cell = await find_user(ctx.author, sheet8)
-        if cell is None:
-            await ctx.send("Error: Your account was not found in the database.", ephemeral=True)
-            return
+@bot.command()
+async def shop(ctx):
+    embed = discord.Embed(title="Welcome to the store", description=f"{ctx.author.mention}, choose the product you want!")
+    for i, item in enumerate(items):
+        embed.add_field(name=f"Item {i}", value=f"Cost: {item['cost']}", inline=False)
+    await ctx.send(embed=embed)
 
-        user_points = int(sheet8.cell(cell.row, 2).value)
+@bot.command()
+async def buy(ctx, item_number: int):
+    item = items[item_number]
 
-        if user_points < item['cost']:
-            await ctx.send("Sorry, you can't purchase this item because you don't have enough points.", ephemeral=True)
-            return
+    # Get user points from Google Sheets
+    sheet8, _ = await get_sheet8()
+    cell = await find_user(ctx.author, sheet8)
+    if cell is None:
+        await ctx.send("Error: Your account was not found in the database.", ephemeral=True)
+        return
 
-        # Confirm purchase
-        message = await ctx.send(f"You need {item['cost']} points to buy {item['name']}. Do you want to use {item['cost']} points to buy {item['name']}?", ephemeral=True)
-        await message.add_reaction('✅')
-        await message.add_reaction('❌')
+    user_points = int(sheet8.cell(cell.row, 2).value)
 
-        def check(reaction, user):
-            return user == ctx.author and str(reaction.emoji) in ['✅', '❌']
+    if user_points < item['cost']:
+        await ctx.send("Sorry, you can't purchase this item because you don't have enough points.", ephemeral=True)
+        return
 
-        reaction, user = await self.bot.wait_for('reaction_add', check=check)
+    # Confirm purchase
+    message = await ctx.send(f"You need {item['cost']} points to buy {item['name']}. Do you want to use {item['cost']} points to buy {item['name']}?", ephemeral=True)
+    await message.add_reaction('✅')
+    await message.add_reaction('❌')
 
-        if str(reaction.emoji) == '✅':
-            # Deduct points and assign role
-            new_points = user_points - item['cost']
-            await sheet8.update_cell(cell.row, 2, new_points)
-            role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
-            await ctx.author.add_roles(role)
-            await ctx.send("Purchase successful! Your new points balance is: " + str(new_points), ephemeral=True)
-        else:
-            await ctx.send("Purchase cancelled.", ephemeral=True)
+    def check(reaction, user):
+        return user == ctx.author and str(reaction.emoji) in ['✅', '❌']
+
+    reaction, user = await bot.wait_for('reaction_add', check=check)
+
+    if str(reaction.emoji) == '✅':
+        # Deduct points and assign role
+        new_points = user_points - item['cost']
+        await sheet8.update_cell(cell.row, 2, new_points)
+        role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
+        await ctx.author.add_roles(role)
+        await ctx.send("Purchase successful! Your new points balance is: " + str(new_points), ephemeral=True)
+    else:
+        await ctx.send("Purchase cancelled.", ephemeral=True)
             
 bot.run(TOKEN)
