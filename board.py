@@ -84,7 +84,9 @@ async def update_user_location(sheet, user_cell, steps):
         completed_laps += 1  # 완주 횟수를 1 증가시킵니다.
         new_col = new_col - 27  # E열로 돌아가게 합니다.
 
-    await sheet.update_cells([(user_cell.row, current_col, "0"), (user_cell.row, new_col, "1")])
+    await sheet.update_cell(user_cell.row, current_col, "0")
+    await sheet.update_cell(user_cell.row, new_col, "1")
+    
     return new_col, completed_laps
 
 class DiceRollView(View):
