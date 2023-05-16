@@ -206,7 +206,7 @@ async def mission(ctx):
     selected_missions = random.sample(missions, 3)
     mission_previews = [mission[:6] + "..." for mission in selected_missions]
 
-    embed = discord.Embed(title="Missions", description="Select a mission to view its full text.", color=discord.Color.blue())
+    embed = discord.Embed(title="오늘의 미션", description="아래 세개의 미션 중 하나를 골라 전체 미션을 확인해보세요!", color=discord.Color.blue())
     for idx, preview in enumerate(mission_previews, start=1):
         embed.add_field(name=f"Mission {idx}", value=preview, inline=False)
 
