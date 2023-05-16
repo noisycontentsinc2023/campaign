@@ -335,29 +335,25 @@ class Shop(commands.Cog):
             {"name": "Item 3", "role_id": "ROLE_ID_3", "cost": 30},
         ]
 
-    @commands.command(name='상점')
+    @commands.command()
     async def shop(self, ctx):
         embed = discord.Embed(title="Welcome to the store", description=f"{ctx.author.mention}, choose the product you want!")
         for i, item in enumerate(self.items):
             embed.add_field(name=f"Item {i}", value=f"Cost: {item['cost']}", inline=False)
         await ctx.send(embed=embed)
 
-    @commands.command(name='구매')
+    @commands.command()
     async def buy(self, ctx, item_number: int):
         item = self.items[item_number]
-        user_id = str(ctx.author.id)
 
         # Get user points from Google Sheets
-        user_points = None
-        records = sheet8.get_all_records()
-        for row in records:
-            if str(row['User ID']) == user_id:
-                user_points = int(row['Points'])
-                break
-
-        if user_points is None:
+        sheet8, _ = await get_sheet8()
+        cell = await find_user(ctx.author, sheet8)
+        if cell is None:
             await ctx.send("Error: Your account was not found in the database.", ephemeral=True)
             return
+
+        user_points = int(sheet8.cell(cell.row, 2).value)
 
         if user_points < item['cost']:
             await ctx.send("Sorry, you can't purchase this item because you don't have enough points.", ephemeral=True)
@@ -376,7 +372,7 @@ class Shop(commands.Cog):
         if str(reaction.emoji) == '✅':
             # Deduct points and assign role
             new_points = user_points - item['cost']
-            sheet8.update_cell(row['Row Number'], 2, new_points)  # Assume 'Row Number' column exists and stores the row number in the sheet
+            await sheet8.update_cell(cell.row, 2, new_points)
             role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
             await ctx.author.add_roles(role)
             await ctx.send("Purchase successful! Your new points balance is: " + str(new_points), ephemeral=True)
