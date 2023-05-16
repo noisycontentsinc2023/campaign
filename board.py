@@ -93,6 +93,7 @@ class DiceRollView(View):
         self.ctx = ctx
         self.sheet7 = sheet7
         self.message = message
+        self.cell = None
 
     async def update_message(self):
         cell = await find_user(self.ctx.author, self.sheet7)  # cell 변수 추가
@@ -116,6 +117,9 @@ class DiceRollView(View):
     @discord.ui.button(label='주사위 굴리기', style=discord.ButtonStyle.primary)
     async def roll_the_dice(self, interaction: discord.Interaction, button: discord.ui.Button):
         
+        if not self.cell:
+            self.cell = await find_user(self.ctx.author, self.sheet7)
+            
         cell = await find_user(self.ctx.author, self.sheet7)
         if cell:
             cell_value = await self.sheet7.acell(f'B{cell.row}')
