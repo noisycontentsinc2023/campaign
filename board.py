@@ -189,9 +189,22 @@ async def get_random_missions(sheet):
 
 @bot.command(name="미션")
 async def mission(ctx):
-    sheet7, _ = await get_sheet7()
-    missions = await get_random_missions(sheet7)
-    mission_previews = [mission[:6] + "..." for mission in missions]
+    missions = [
+        "Mission 1: Example mission text 1",
+        "Mission 2: Example mission text 2",
+        "Mission 3: Example mission text 3",
+        "Mission 4: Example mission text 4",
+        "Mission 5: Example mission text 5",
+        "Mission 6: Example mission text 6",
+        "Mission 7: Example mission text 7",
+        "Mission 8: Example mission text 8",
+        "Mission 9: Example mission text 9",
+        "Mission 10: Example mission text 10",
+    ]
+
+    # Randomly select three missions
+    selected_missions = random.sample(missions, 3)
+    mission_previews = [mission[:6] + "..." for mission in selected_missions]
 
     embed = discord.Embed(title="Missions", description="Select a mission to view its full text.", color=discord.Color.blue())
     for idx, preview in enumerate(mission_previews, start=1):
@@ -213,11 +226,11 @@ async def mission(ctx):
     else:
         selected_mission = ""
         if str(reaction.emoji) == "1️⃣":
-            selected_mission = missions[0]
+            selected_mission = selected_missions[0]
         elif str(reaction.emoji) == "2️⃣":
-            selected_mission = missions[1]
+            selected_mission = selected_missions[1]
         elif str(reaction.emoji) == "3️⃣":
-            selected_mission = missions[2]
+            selected_mission = selected_missions[2]
 
         # Create an embed message for the selected mission
         embed = discord.Embed(
