@@ -328,7 +328,7 @@ items = [
 
 @bot.command(name='상점')
 async def shop(ctx):
-    embed = discord.Embed(title="Welcome to the store", description=f"{ctx.author.mention}, choose the product you want!")
+    embed = discord.Embed(title="상점에 오신걸 환영합니다!", description=f"{ctx.author.mention}님 원하시는 품목을 선택해주세요!")
     for i, item in enumerate(items):
         embed.add_field(name=f"Item {i}", value=f"Cost: {item['cost']}", inline=False)
     await ctx.send(embed=embed)
@@ -341,13 +341,13 @@ async def buy(ctx, item_number: int):
     sheet8, _ = await get_sheet8()
     cell = await find_user(ctx.author, sheet8)
     if cell is None:
-        await ctx.send("Error: Your account was not found in the database.", ephemeral=True)
+        await ctx.send("에 참여하지 않은 멤버입니다", ephemeral=True)
         return
 
     user_points = int((await sheet8.cell(cell.row, 2)).value)
 
     if user_points < item['cost']:
-        await ctx.send("Sorry, you can't purchase this item because you don't have enough points.", ephemeral=True)
+        await ctx.send("해당 품목을 구매하기에는 포인트가 충분하지 않아요", ephemeral=True)
         return
 
     # Confirm purchase
@@ -357,7 +357,7 @@ async def buy(ctx, item_number: int):
 
     def check(reaction, user):
         if user != ctx.author and str(reaction.emoji) in ['✅', '❌']:
-            bot.loop.create_task(ctx.send(f"{user.mention}, only the command author can select this emoji!", ephemeral=True))
+            bot.loop.create_task(ctx.send(f"{user.mention}님 당사자만 해당 이모지를 클릭할 수 있어요!", ephemeral=True))
             return False
         return user == ctx.author and str(reaction.emoji) in ['✅', '❌']
 
@@ -372,8 +372,8 @@ async def buy(ctx, item_number: int):
             await sheet8.update_cell(cell.row, 2, new_points)
             role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
             await ctx.author.add_roles(role)
-            await ctx.send("Purchase successful! Your new points balance is: " + str(new_points), ephemeral=True)
+            await ctx.send("구매완료! 잔여 포인트는" + str(new_points), ephemeral=True)
         else:
-            await ctx.send("Purchase cancelled.", ephemeral=True)
+            await ctx.send("구매가 취소되었습니다", ephemeral=True)
             
 bot.run(TOKEN)
