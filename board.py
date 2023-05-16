@@ -245,15 +245,13 @@ async def find_user(user, sheet8):
     return cell
 
 class AuthButton(discord.ui.Button):
-    def __init__(self, ctx, user, date):
+    def __init__(self, ctx, user):
         super().__init__(style=discord.ButtonStyle.green, label="확인")
         self.ctx = ctx
         self.user = user
-        self.date = date
-        self.stop_loop = False  # Add the stop_loop attribute
+        self.stop_loop = False
     
     async def callback(self, interaction: discord.Interaction):
-        
         sheet8, rows = await get_sheet8()
         
         if interaction.user == self.ctx.author:
@@ -262,34 +260,16 @@ class AuthButton(discord.ui.Button):
         if str(self.user) not in existing_users:
             empty_row = len(existing_users) + 1
             await sheet8.update_cell(empty_row, 1, str(self.user))
-            existing_dates = await shee8.row_values(1)
-            if self.date not in existing_dates:
-                empty_col = len(existing_dates) + 1
-                await sheet8.update_cell(1, empty_col, self.date)
-                await sheet8.update_cell(empty_row, empty_col, "1")
-            else:
-                col = existing_dates.index(self.date) + 1
-                await sheet8.update_cell(empty_row, col, "1")
+            await sheet8.update_cell(empty_row, 2, "1")  # Update B column
         else:
             index = existing_users.index(str(self.user)) + 1
-            existing_dates = await sheet8.row_values(1)
-            if self.date not in existing_dates:
-                empty_col = len(existing_dates) + 1
-                await sheet8.update_cell(1, empty_col, self.date)
-                await sheet8.update_cell(index, empty_col, "1")
-            else:
-                col = existing_dates.index(self.date) + 1
-                await sheet8.update_cell(index, col, "1")
-                
-            # Increment the count in column B for the user
-            count_cell = await sheet8.cell(index, 2)  # Column B is index 2
+            count_cell = await sheet8.cell(index, 2)  # Get the cell in column B
             current_count = int(count_cell.value or "0")  # If cell is empty, treat as 0
-            await sheet8.update_cell(index, 2, str(current_count + 1))
-            
-        await interaction.message.edit(embed=discord.Embed(title="인증상황", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}의 {self.date} 인증했습니다🥳"), view=None)
+            await sheet8.update_cell(index, 2, str(current_count + 1))  # Increment the count
+        await interaction.message.edit(embed=discord.Embed(title="인증상황", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}를 인증했습니다🥳"), view=None)
         self.stop_loop = True
-        await update_count(sheet8, interaction.user)  # Update the count of the user who clicked the button
-
+        await update_count(sheet8, interaction.user)
+        
 class CancelButton(discord.ui.Button):
     def __init__(self, ctx):
         super().__init__(style=discord.ButtonStyle.red, label="취소")
@@ -322,31 +302,28 @@ async def update_embed(ctx, date, msg):
             break
             
 @bot.command(name='인증')
-async def Authentication(ctx, date):
-    
+async def Authentication(ctx):
     sheet8, rows = await get_sheet8()
     existing_users = await sheet8.col_values(1)
     if str(ctx.author) in existing_users:
         user_index = existing_users.index(str(ctx.author)) + 1
-        existing_dates = await sheet8.row_values(1)
-        if date in existing_dates:
-            date_index = existing_dates.index(date) + 1
-            cell_value = await sheet8.cell(user_index, date_index)
-            if cell_value.value == "1":
-                await ctx.send(embed=discord.Embed(title="Authorization Status", description=f"{ctx.author.mention}님, 해당 날짜는 이미 인증되었습니다!"))
-                return
+        count_cell = await sheet8.cell(user_index, 2)  # Get the cell in column B
+        if count_cell.value == "1":
+            await ctx.send(embed=discord.Embed(title="Authorization Status", description=f"{ctx.author.mention}님, 이미 인증되었습니다!"))
+            return
 
-    embed = discord.Embed(title="인증상태", description=f"{ctx.author.mention}님의 {date} 일취월장 인증 요청입니다")
+    embed = discord.Embed(title="인증상태", description=f"{ctx.author.mention}님의 인증 요청입니다")
     view = discord.ui.View()
-    button = AuthButton(ctx, ctx.author, date)
+    button = AuthButton(ctx, ctx.author)
     view.add_item(button)
-    view.add_item(CancelButton(ctx)) # Add the CancelButton to the view
+    view.add_item(CancelButton(ctx))
     msg = await ctx.send(embed=embed, view=view)
     
-    asyncio.create_task(update_embed(ctx, date, msg))
+    asyncio.create_task(update_embed(ctx, msg))
 
     def check(interaction: discord.Interaction):
         return interaction.message.id == msg.id and interaction.data.get("component_type") == discord.ComponentType.button.value
 
-    await bot.wait_for("interaction", check=check)    
+    await bot.wait_for("interaction", check=check)
+    
 bot.run(TOKEN)
