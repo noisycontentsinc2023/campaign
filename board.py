@@ -223,5 +223,53 @@ async def mission(ctx):
         )
         await ctx.send(embed=embed)
 
+#---------------------------------------------------------------------------#
+
+async def get_sheet8():
+    client_manager = gspread_asyncio.AsyncioGspreadClientManager(lambda: aio_creds)
+    client = await client_manager.authorize()
+    spreadsheet = await client.open('서버기록')
+    sheet8 = await spreadsheet.worksheet('가칭')
+    rows = await sheet8.get_all_values()
+    return sheet8, rows
+  
+async def find_user(user, sheet8):
+    cell = None
+    try:
+        username_with_discriminator = f'{user.name}#{user.discriminator}'
+        cells = await sheet8.findall(username_with_discriminator)
+        if cells:
+            cell = cells[0]
+    except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
+        print(f'find_user error: {e}')
+    return cell
+  
+@bot.command(name='인증')
+async def Authentication(ctx, date):
     
+    sheet8, rows = await get_sheet8()
+    existing_users = await sheet8.col_values(1)
+    if str(ctx.author) in existing_users:
+        user_index = existing_users.index(str(ctx.author)) + 1
+        existing_dates = await sheet8.row_values(1)
+        if date in existing_dates:
+            date_index = existing_dates.index(date) + 1
+            cell_value = await sheet8.cell(user_index, date_index)
+            if cell_value.value == "1":
+                await ctx.send(embed=discord.Embed(title="Authorization Status", description=f"{ctx.author.mention}님, 해당 날짜는 이미 인증되었습니다!"))
+                return
+
+    embed = discord.Embed(title="인증상태", description=f"{ctx.author.mention}님의 {date} 일취월장 인증 요청입니다")
+    view = discord.ui.View()
+    button = AuthButton(ctx, ctx.author, date)
+    view.add_item(button)
+    view.add_item(CancelButton(ctx)) # Add the CancelButton to the view
+    msg = await ctx.send(embed=embed, view=view)
+    
+    asyncio.create_task(update_embed(ctx, date, msg))
+
+    def check(interaction: discord.Interaction):
+        return interaction.message.id == msg.id and interaction.data.get("component_type") == discord.ComponentType.button.value
+
+    await bot.wait_for("interaction", check=check)    
 bot.run(TOKEN)
