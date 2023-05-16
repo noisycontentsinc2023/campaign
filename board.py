@@ -303,14 +303,6 @@ async def update_embed(ctx, msg):
             
 @bot.command(name='인증')
 async def Authentication(ctx):
-    sheet8, rows = await get_sheet8()
-    existing_users = await sheet8.col_values(1)
-    if str(ctx.author) in existing_users:
-        user_index = existing_users.index(str(ctx.author)) + 1
-        count_cell = await sheet8.cell(user_index, 2)  # Get the cell in column B
-        if count_cell.value == "1":
-            await ctx.send(embed=discord.Embed(title="Authorization Status", description=f"{ctx.author.mention}님, 이미 인증되었습니다!"))
-            return
 
     embed = discord.Embed(title="인증상태", description=f"{ctx.author.mention}님의 인증 요청입니다")
     view = discord.ui.View()
