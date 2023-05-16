@@ -353,7 +353,7 @@ async def buy(ctx, item_number: int):
         await ctx.send("Error: Your account was not found in the database.", ephemeral=True)
         return
 
-    user_points = int(sheet8.cell(cell.row, 2).value)
+    user_points = int((await sheet8.cell(cell.row, 2)).value)
 
     if user_points < item['cost']:
         await ctx.send("Sorry, you can't purchase this item because you don't have enough points.", ephemeral=True)
