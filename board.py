@@ -145,6 +145,8 @@ class DiceRollView(View):
         else:
             await interaction.response.send_message('등록되지 않은 멤버입니다', ephemeral=True)
             
+        await mission(self.ctx)
+            
 @bot.command(name='보드')
 async def world(ctx):
     sheet7, rows = await get_sheet7()
