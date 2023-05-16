@@ -84,9 +84,7 @@ async def update_user_location(sheet, user_cell, steps):
         completed_laps += 1  # 완주 횟수를 1 증가시킵니다.
         new_col = new_col - 27  # E열로 돌아가게 합니다.
 
-    await sheet.update_cell(user_cell.row, current_col, "0")
-    await sheet.update_cell(user_cell.row, new_col, "1")
-
+    await sheet.update_cells([(user_cell.row, current_col, "0"), (user_cell.row, new_col, "1")])
     return new_col, completed_laps
 
 class DiceRollView(View):
@@ -165,29 +163,6 @@ async def world(ctx):
     await message.delete(delay=180)  # 3분 후에 삭제
     view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
     await message.edit(embed=embed, view=view) 
-
-
-async def get_column_values(sheet, col):
-    col_letter = gspread.utils.rowcol_to_a1(1, col)
-    data = await sheet.get(f'{col_letter}1:{col_letter}{sheet.row_count}')
-    return [cell[0] for cell in data]
-
-
-async def get_random_missions(sheet):
-    max_row = min(sheet.row_count, 100)
-    max_col = sheet.col_count
-
-    mission_col = await get_column_values(sheet, 4)  # D열의 값을 가져옴
-
-    missions = []
-    while len(missions) < 3:
-        random_row = random.randint(2, max_row)
-        cell = await sheet.cell(random_row, 4)  # D열에 해당하는 열 인덱스는 4
-        if cell.value and cell.value not in missions and cell.value not in mission_col:
-            missions.append(cell.value)
-
-    return missions
-
 
 @bot.command(name="미션")
 async def mission(ctx):
