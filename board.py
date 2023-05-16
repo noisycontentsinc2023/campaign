@@ -283,19 +283,19 @@ class CancelButton(discord.ui.Button):
         else:
             await interaction.response.send_message("글 작성자만 취소할 수 있습니다", ephemeral=True)
 
-async def update_embed(ctx, date, msg):
-    button = AuthButton(ctx, ctx.author, date) # Move button creation outside of the loop
-    cancel = CancelButton(ctx)  # Create a CancelButton instance
+async def update_embed(ctx, msg):
+    button = AuthButton(ctx, ctx.author)  # We no longer pass 'date' here
+    cancel = CancelButton(ctx)
     while True:
         try:
-            if button.stop_loop or cancel.stop_loop: # Check if any button's stop_loop is True before updating the message
+            if button.stop_loop or cancel.stop_loop:
                 break
 
             view = discord.ui.View(timeout=None)
             view.add_item(button)
-            view.add_item(cancel)  # Add the CancelButton to the view
+            view.add_item(cancel)
 
-            embed = discord.Embed(title="인증요청", description=f"{ctx.author.mention}님의 {date} 일취월장 인증입니다")
+            embed = discord.Embed(title="인증요청", description=f"{ctx.author.mention}님의 인증입니다")  # We no longer use 'date' here
             await msg.edit(embed=embed, view=view)
             await asyncio.sleep(60)
         except discord.errors.NotFound:
