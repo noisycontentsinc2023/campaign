@@ -243,7 +243,84 @@ async def find_user(user, sheet8):
     except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
         print(f'find_user error: {e}')
     return cell
-  
+
+class AuthButton(discord.ui.Button):
+    def __init__(self, ctx, user, date):
+        super().__init__(style=discord.ButtonStyle.green, label="확인")
+        self.ctx = ctx
+        self.user = user
+        self.date = date
+        self.stop_loop = False  # Add the stop_loop attribute
+    
+    async def callback(self, interaction: discord.Interaction):
+        
+        sheet8, rows = await get_sheet8()
+        
+        if interaction.user == self.ctx.author:
+            return
+        existing_users = await sheet8.col_values(1)
+        if str(self.user) not in existing_users:
+            empty_row = len(existing_users) + 1
+            await sheet8.update_cell(empty_row, 1, str(self.user))
+            existing_dates = await shee8.row_values(1)
+            if self.date not in existing_dates:
+                empty_col = len(existing_dates) + 1
+                await sheet8.update_cell(1, empty_col, self.date)
+                await sheet8.update_cell(empty_row, empty_col, "1")
+            else:
+                col = existing_dates.index(self.date) + 1
+                await sheet8.update_cell(empty_row, col, "1")
+        else:
+            index = existing_users.index(str(self.user)) + 1
+            existing_dates = await sheet8.row_values(1)
+            if self.date not in existing_dates:
+                empty_col = len(existing_dates) + 1
+                await sheet8.update_cell(1, empty_col, self.date)
+                await sheet8.update_cell(index, empty_col, "1")
+            else:
+                col = existing_dates.index(self.date) + 1
+                await sheet8.update_cell(index, col, "1")
+                
+            # Increment the count in column B for the user
+            count_cell = await sheet8.cell(index, 2)  # Column B is index 2
+            current_count = int(count_cell.value or "0")  # If cell is empty, treat as 0
+            await sheet8.update_cell(index, 2, str(current_count + 1))
+            
+        await interaction.message.edit(embed=discord.Embed(title="인증상황", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}의 {self.date} 인증했습니다🥳"), view=None)
+        self.stop_loop = True
+        await update_count(sheet8, interaction.user)  # Update the count of the user who clicked the button
+
+class CancelButton(discord.ui.Button):
+    def __init__(self, ctx):
+        super().__init__(style=discord.ButtonStyle.red, label="취소")
+        self.ctx = ctx
+        self.stop_loop = False  # Add the stop_loop attribute
+    
+    async def callback(self, interaction: discord.Interaction):
+        if interaction.user.id == self.ctx.author.id:
+            await interaction.message.delete()
+            self.stop_loop = True
+        else:
+            await interaction.response.send_message("글 작성자만 취소할 수 있습니다", ephemeral=True)
+
+async def update_embed(ctx, date, msg):
+    button = AuthButton(ctx, ctx.author, date) # Move button creation outside of the loop
+    cancel = CancelButton(ctx)  # Create a CancelButton instance
+    while True:
+        try:
+            if button.stop_loop or cancel.stop_loop: # Check if any button's stop_loop is True before updating the message
+                break
+
+            view = discord.ui.View(timeout=None)
+            view.add_item(button)
+            view.add_item(cancel)  # Add the CancelButton to the view
+
+            embed = discord.Embed(title="인증요청", description=f"{ctx.author.mention}님의 {date} 일취월장 인증입니다")
+            await msg.edit(embed=embed, view=view)
+            await asyncio.sleep(60)
+        except discord.errors.NotFound:
+            break
+            
 @bot.command(name='인증')
 async def Authentication(ctx, date):
     
