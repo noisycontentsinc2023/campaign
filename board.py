@@ -365,18 +365,24 @@ async def buy(ctx, item_number: int):
     await message.add_reaction('❌')
 
     def check(reaction, user):
+        if user != ctx.author and str(reaction.emoji) in ['✅', '❌']:
+            bot.loop.create_task(ctx.send(f"{user.mention}, only the command author can select this emoji!", ephemeral=True))
+            return False
         return user == ctx.author and str(reaction.emoji) in ['✅', '❌']
 
-    reaction, user = await bot.wait_for('reaction_add', check=check)
-
-    if str(reaction.emoji) == '✅':
-        # Deduct points and assign role
-        new_points = user_points - item['cost']
-        await sheet8.update_cell(cell.row, 2, new_points)
-        role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
-        await ctx.author.add_roles(role)
-        await ctx.send("Purchase successful! Your new points balance is: " + str(new_points), ephemeral=True)
+    try:
+        reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
+    except asyncio.TimeoutError:
+        await ctx.send('No response...', ephemeral=True)
     else:
-        await ctx.send("Purchase cancelled.", ephemeral=True)
+        if str(reaction.emoji) == '✅':
+            # Deduct points and assign role
+            new_points = user_points - item['cost']
+            await sheet8.update_cell(cell.row, 2, new_points)
+            role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
+            await ctx.author.add_roles(role)
+            await ctx.send("Purchase successful! Your new points balance is: " + str(new_points), ephemeral=True)
+        else:
+            await ctx.send("Purchase cancelled.", ephemeral=True)
             
 bot.run(TOKEN)
