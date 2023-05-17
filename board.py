@@ -303,7 +303,7 @@ async def update_embed(ctx, msg):
 @bot.command(name='인증')
 async def Authentication(ctx):
 
-    embed = discord.Embed(title="인증상태", description=f"{ctx.author.mention}님의 인증 요청입니다")
+    embed = discord.Embed(title="인증요청", description=f"{ctx.author.mention}님의 인증 요청입니다")
     view = discord.ui.View()
     button = AuthButton(ctx, ctx.author)
     view.add_item(button)
@@ -351,7 +351,7 @@ async def buy(ctx, item_number: int):
         return
 
     # Confirm purchase
-    message = await ctx.send(f"You need {item['cost']} points to buy {item['name']}. Do you want to use {item['cost']} points to buy {item['name']}?", ephemeral=True)
+    message = await ctx.send(f"{item['name']}을 구매하기 위해서는 {item['cost']} 포인트가 필요합니다 . {item['cost']} 포인트를 소모해서 {item['name']} 구매하시겠어요?", ephemeral=True)
     await message.add_reaction('✅')
     await message.add_reaction('❌')
 
