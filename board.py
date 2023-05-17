@@ -328,7 +328,7 @@ items = [
 
 @bot.command(name='상점')
 async def shop(ctx):
-    embed = discord.Embed(title="상점에 오신걸 환영합니다!", description=f"{ctx.author.mention}님 원하시는 품목을 선택해주세요!")
+    embed = discord.Embed(title="포인트상점에 오신걸 환영합니다!", description=f"{ctx.author.mention}님 원하시는 품목을 선택해주세요!")
     for i, item in enumerate(items):
         embed.add_field(name=f"Item {i}", value=f"Cost: {item['cost']}", inline=False)
     await ctx.send(embed=embed)
