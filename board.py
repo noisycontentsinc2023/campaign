@@ -347,6 +347,7 @@ async def shop(ctx):
     for i, item in enumerate(items):
         embed.add_field(name=f"Item {i}", value=f"Cost: {item['cost']}", inline=False)
     await ctx.send(embed=embed)
+    await message.delete(delay=180)
 
 @bot.command(name='구매')
 async def buy(ctx, item_number: int):
@@ -390,5 +391,7 @@ async def buy(ctx, item_number: int):
             await ctx.send("구매완료! 잔여 포인트는" + str(new_points), ephemeral=True)
         else:
             await ctx.send("구매가 취소되었습니다", ephemeral=True)
+    
+    await message.delete(delay=180)
             
 bot.run(TOKEN)
