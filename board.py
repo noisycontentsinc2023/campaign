@@ -275,7 +275,7 @@ class AuthButton(discord.ui.Button):
         self.stop_loop = True
         success = await update_count(sheet8, interaction.user)
         if success:
-            await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}의 를 인증했습니다🥳\n {self.ctx.author.mention}님 5 포인트가 누적됐습니다!\n{interaction.user.mention}님 1포인트 누적 됐습니다!"), view=None)
+            await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}의 를 인증했습니다🥳\n {self.ctx.author.mention}님 5 포인트가 누적됐어요!\n{interaction.user.mention}님 1포인트가 누적됐어요!"), view=None)
         
 class CancelButton(discord.ui.Button):
     def __init__(self, ctx):
