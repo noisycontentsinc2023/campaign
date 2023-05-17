@@ -244,6 +244,19 @@ async def find_user(user, sheet8):
         print(f'find_user error: {e}')
     return cell
 
+async def update_count(sheet8, user):
+    existing_users = await sheet8.col_values(1)
+    if str(user) not in existing_users:
+        empty_row = len(existing_users) + 1
+        await sheet8.update_cell(empty_row, 1, str(user))
+        await sheet8.update_cell(empty_row, 2, "1")
+    else:
+        index = existing_users.index(str(user)) + 1
+        current_count = await sheet8.cell(index, 2)
+        current_value = current_count.value if current_count.value is not None else 0
+        new_count = int(current_value) + 1
+        await sheet8.update_cell(index, 2, str(new_count))
+        
 class AuthButton(discord.ui.Button):
     def __init__(self, ctx, user):
         super().__init__(style=discord.ButtonStyle.green, label="확인")
@@ -266,8 +279,10 @@ class AuthButton(discord.ui.Button):
             count_cell = await sheet8.cell(index, 2)  # Get the cell in column B
             current_count = int(count_cell.value or "0")  # If cell is empty, treat as 0
             await sheet8.update_cell(index, 2, str(current_count + 1))  # Increment the count
-        await interaction.message.edit(embed=discord.Embed(title="인증상황", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}의 를 인증했습니다🥳\n 5포인트가 누적됐습니다!"), view=None)
+        await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}의 를 인증했습니다🥳\n 5 포인트가 누적됐습니다!"), view=None)
+        await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{interaction.user.mention}님에게 1 포인트가 누적됐습니다!"), view=None)
         self.stop_loop = True
+        await update_count(sheet2, interaction.user)
         
 class CancelButton(discord.ui.Button):
     def __init__(self, ctx):
