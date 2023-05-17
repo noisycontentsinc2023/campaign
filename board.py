@@ -233,40 +233,33 @@ async def get_sheet8():
     rows = await sheet8.get_all_values()
     return sheet8, rows
   
-async def find_user(user, sheet8):
-    cell = None
-    try:
-        username_with_discriminator = f'{user.name}#{user.discriminator}'
-        cells = await sheet8.findall(username_with_discriminator)
-        if cells:
-            cell = cells[0]
-    except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
-        print(f'find_user error: {e}')
-    return cell
-
 async def update_count(sheet8, user):
     existing_users = await sheet8.col_values(1)
-    if str(user) not in existing_users:
-        empty_row = len(existing_users) + 1
-        await sheet8.update_cell(empty_row, 1, str(user))
-        await sheet8.update_cell(empty_row, 2, "1")
-    else:
-        index = existing_users.index(str(user)) + 1
-        current_count = await sheet8.cell(index, 2)
-        current_value = current_count.value if current_count.value is not None else 0
-        new_count = int(current_value) + 1
-        await sheet8.update_cell(index, 2, str(new_count))
-        
+    try:
+        if str(user) not in existing_users:
+            empty_row = len(existing_users) + 1
+            await sheet8.update_cell(empty_row, 1, str(user))
+            await sheet8.update_cell(empty_row, 2, "1")
+        else:
+            index = existing_users.index(str(user)) + 1
+            current_count = await sheet8.cell(index, 2)
+            current_value = current_count.value if current_count.value is not None else 0
+            new_count = int(current_value) + 1
+            await sheet8.update_cell(index, 2, str(new_count))
+        return True
+    except:
+        return False
+
 class AuthButton(discord.ui.Button):
     def __init__(self, ctx, user):
         super().__init__(style=discord.ButtonStyle.green, label="확인")
         self.ctx = ctx
         self.user = user
         self.stop_loop = False
-    
+
     async def callback(self, interaction: discord.Interaction):
         sheet8, rows = await get_sheet8()
-        
+
         if interaction.user == self.ctx.author:
             return
         existing_users = await sheet8.col_values(1)
@@ -279,9 +272,10 @@ class AuthButton(discord.ui.Button):
             count_cell = await sheet8.cell(index, 2)  # Get the cell in column B
             current_count = int(count_cell.value or "0")  # If cell is empty, treat as 0
             await sheet8.update_cell(index, 2, str(current_count + 5))  # Increment the count
-        await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}의 를 인증했습니다🥳\n 5 포인트가 누적됐습니다!"), view=None)
         self.stop_loop = True
-        await update_count(sheet8, interaction.user)
+        success = await update_count(sheet8, interaction.user)
+        if success:
+            await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}의 를 인증했습니다🥳\n {self.ctx.author.mention}님 5 포인트가 누적됐습니다!\n{interaction.user.mention}님 1포인트 누적 됐습니다!"), view=None)
         
 class CancelButton(discord.ui.Button):
     def __init__(self, ctx):
