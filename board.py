@@ -377,7 +377,7 @@ async def buy(ctx, item_number: int):
     role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
     
     # Confirm purchase
-    message = await ctx.send(f"{role.mention}을 구매하기 위해서는 {item['cost']} 포인트가 필요합니다 . {item['cost']} 포인트를 소모해서 {item['role_id']} 구매하시겠어요?", ephemeral=True)
+    message = await ctx.send(f"{role.mention}를(을) 구매하기 위해서는 {item['cost']} 포인트가 필요합니다 . {item['cost']} 포인트를 소모해서 {role.mention}를(을) 구매하시겠어요?", ephemeral=True)
     await message.add_reaction('✅')
     await message.add_reaction('❌')
 
