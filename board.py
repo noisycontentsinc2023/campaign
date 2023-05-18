@@ -373,8 +373,11 @@ async def buy(ctx, item_number: int):
         await ctx.send("해당 품목을 구매하기에는 포인트가 충분하지 않아요", ephemeral=True)
         return
 
+    # Get the role for the item
+    role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
+    
     # Confirm purchase
-    message = await ctx.send(f"{item['role_id']}을 구매하기 위해서는 {item['cost']} 포인트가 필요합니다 . {item['cost']} 포인트를 소모해서 {item['role_id']} 구매하시겠어요?", ephemeral=True)
+    message = await ctx.send(f"{role.mention}을 구매하기 위해서는 {item['cost']} 포인트가 필요합니다 . {item['cost']} 포인트를 소모해서 {item['role_id']} 구매하시겠어요?", ephemeral=True)
     await message.add_reaction('✅')
     await message.add_reaction('❌')
 
@@ -385,7 +388,7 @@ async def buy(ctx, item_number: int):
         return user == ctx.author and str(reaction.emoji) in ['✅', '❌']
 
     try:
-        reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
+        reaction, user = await bot.wait_for('reaction_add', timeout=90.0, check=check)
     except asyncio.TimeoutError:
         await ctx.send('No response...', ephemeral=True)
     else:
