@@ -409,7 +409,7 @@ async def buy(ctx, item_number: int):
             role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
             await ctx.author.add_roles(role)
             await ctx.author.add_roles(additional_role)
-            await ctx.send("구매완료! 잔여 포인트는" + str(new_points), ephemeral=True)
+            await ctx.send(f"구매완료! 잔여 포인트는 {new_points} 입니다", ephemeral=True)
         else:
             await ctx.send("구매가 취소되었습니다", ephemeral=True)
     
