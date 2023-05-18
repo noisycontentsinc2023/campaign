@@ -353,8 +353,8 @@ async def shop(ctx):
     embed = discord.Embed(title="포인트상점에 오신걸 환영합니다!", description=f"{ctx.author.mention}님 원하시는 품목을 선택해주세요!")
     for item in items:
         embed.add_field(name=item['name'], value=f"Cost: {item['cost']}", inline=False)
-    await ctx.send(embed=embed)
-    await ctx.message.delete(delay=180)
+    message = await ctx.send(embed=embed)
+    await message.delete(delay=180)
 
 @bot.command(name='구매')
 async def buy(ctx, item_number: int):
