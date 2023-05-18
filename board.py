@@ -378,6 +378,11 @@ async def buy(ctx, item_number: int):
     # Get the role for the item
     role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
     
+    # Check if user already has this role
+    if role in ctx.author.roles:
+        await ctx.send("You have already purchased this item!", ephemeral=True)
+        return
+      
     # 구매시 기본 획득 롤
     additional_role = discord.utils.get(ctx.guild.roles, id=1107916119957844038)
     
