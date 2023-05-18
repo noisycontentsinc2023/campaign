@@ -335,18 +335,20 @@ async def Authentication(ctx):
 
 
 items = [
-    {"name": "0. 완주자", "role_id": "1107916119957844038", "cost": 10},
-    {"name": "1. 팬더단", "role_id": "1108296480399302666", "cost": 20},
-    {"name": "2. 스터디플래너-영", "role_id": "1108296512015958086", "cost": 30},
-    {"name": "3. 스터디플래너-일", "role_id": "1108296523323813978", "cost": 30},
-    {"name": "4. 스터디플래너-스", "role_id": "1108296601526612060", "cost": 30},
-    {"name": "5. 스터디플래너-프", "role_id": "1108296604923998299", "cost": 30},
-    {"name": "6. 스터디플래너-중", "role_id": "1108296607088263202", "cost": 30},
-    {"name": "7. 스터디플래너-독", "role_id": "1108296609390923787", "cost": 30},
-    {"name": "8. 10% 쿠폰", "role_id": "1108296611114799196", "cost": 30},
-    {"name": "9. VOD 한 건 무료", "role_id": "1108296777393786890", "cost": 30},
+    {"name": "0. 팬더단", "role_id": "1108296480399302666", "cost": 20},
+    {"name": "1. 스터디플래너-영", "role_id": "1108296512015958086", "cost": 30},
+    {"name": "2. 스터디플래너-일", "role_id": "1108296523323813978", "cost": 30},
+    {"name": "3. 스터디플래너-스", "role_id": "1108296601526612060", "cost": 30},
+    {"name": "4. 스터디플래너-프", "role_id": "1108296604923998299", "cost": 30},
+    {"name": "5. 스터디플래너-중", "role_id": "1108296607088263202", "cost": 30},
+    {"name": "6. 스터디플래너-독", "role_id": "1108296609390923787", "cost": 30},
+    {"name": "7. 10% 쿠폰", "role_id": "1108296611114799196", "cost": 30},
+    {"name": "8. VOD 한 건 무료", "role_id": "1108296777393786890", "cost": 30},
+    {"name": "8. VOD 한 건 무료", "role_id": "1108586104187277313", "cost": 30},
     {"name": "10. 훈트막스", "role_id": "1108296850244640769", "cost": 30},
 ]
+
+1107916119957844038
 
 @bot.command(name='상점')
 async def shop(ctx):
@@ -376,6 +378,9 @@ async def buy(ctx, item_number: int):
     # Get the role for the item
     role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
     
+    # 구매시 기본 획득 롤
+    additional_role = discord.utils.get(ctx.guild.roles, id=1107916119957844038)
+    
     # Confirm purchase
     message = await ctx.send(f"{role.mention}를(을) 구매하기 위해서는 {item['cost']} 포인트가 필요합니다 . {item['cost']} 포인트를 소모해서 {role.mention}를(을) 구매하시겠어요?", ephemeral=True)
     await message.add_reaction('✅')
@@ -388,7 +393,7 @@ async def buy(ctx, item_number: int):
         return user == ctx.author and str(reaction.emoji) in ['✅', '❌']
 
     try:
-        reaction, user = await bot.wait_for('reaction_add', timeout=90.0, check=check)
+        reaction, user = await bot.wait_for('reaction_add', timeout=180.0, check=check)
     except asyncio.TimeoutError:
         await ctx.send('No response...', ephemeral=True)
     else:
@@ -398,6 +403,7 @@ async def buy(ctx, item_number: int):
             await sheet8.update_cell(cell.row, 2, new_points)
             role = discord.utils.get(ctx.guild.roles, id=int(item['role_id']))
             await ctx.author.add_roles(role)
+            await ctx.author.add_roles(additional_role)
             await ctx.send("구매완료! 잔여 포인트는" + str(new_points), ephemeral=True)
         else:
             await ctx.send("구매가 취소되었습니다", ephemeral=True)
