@@ -374,7 +374,7 @@ async def buy(ctx, item_number: int):
         return
 
     # Confirm purchase
-    message = await ctx.send(f"{item['name']}을 구매하기 위해서는 {item['cost']} 포인트가 필요합니다 . {item['cost']} 포인트를 소모해서 {item['name']} 구매하시겠어요?", ephemeral=True)
+    message = await ctx.send(f"{item['role_id']}을 구매하기 위해서는 {item['cost']} 포인트가 필요합니다 . {item['cost']} 포인트를 소모해서 {item['role_id']} 구매하시겠어요?", ephemeral=True)
     await message.add_reaction('✅')
     await message.add_reaction('❌')
 
