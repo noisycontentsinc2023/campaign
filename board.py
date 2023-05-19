@@ -195,6 +195,9 @@ async def mission(ctx):
 
     message = await ctx.send(embed=embed)
 
+    await asyncio.sleep(60)
+    await message.delete()
+    
     # Add reactions to the message
     for emoji in ["1️⃣", "2️⃣", "3️⃣"]:
         await message.add_reaction(emoji)
@@ -203,9 +206,9 @@ async def mission(ctx):
         return user == ctx.author and str(reaction.emoji) in ["1️⃣", "2️⃣", "3️⃣"]
 
     try:
-        reaction, _ = await bot.wait_for("reaction_add", timeout=60.0, check=check)
+        reaction, _ = await bot.wait_for("reaction_add", timeout=55.0, check=check)
     except asyncio.TimeoutError:
-        await ctx.send("1분내에 선택하지 않아 미션선택이 취소됩니다", delete_after=10)
+        await ctx.send("1분내에 선택하지 않아 미션선택이 취소 됐습니다", delete_after=10)
     else:
         selected_mission = ""
         if str(reaction.emoji) == "1️⃣":
