@@ -194,9 +194,6 @@ async def mission(ctx):
         embed.add_field(name=f"Mission {idx}", value=preview, inline=False)
 
     message = await ctx.send(embed=embed)
-
-    await asyncio.sleep(60)
-    await message.delete()
     
     # Add reactions to the message
     for emoji in ["1️⃣", "2️⃣", "3️⃣"]:
