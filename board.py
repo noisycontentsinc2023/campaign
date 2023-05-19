@@ -173,7 +173,7 @@ async def world(ctx):
 @bot.command(name="미션")
 async def mission(ctx):
     missions = [
-        "Mission 1: Example mission text 1",
+        "스터디미니 앱에 전체 강의 1일차 모음을 다운로드 후 학습해보고 싶은 언어 1일차 학습 후 인증하기",
         "Mission 2: Example mission text 2",
         "Mission 3: Example mission text 3",
         "Mission 4: Example mission text 4",
@@ -187,7 +187,7 @@ async def mission(ctx):
 
     # Randomly select three missions
     selected_missions = random.sample(missions, 3)
-    mission_previews = [mission[:6] + "..." for mission in selected_missions]
+    mission_previews = [mission[:10] + "..." for mission in selected_missions]
 
     embed = discord.Embed(title="오늘의 미션", description=f"{ctx.author.mention}'님, 아래 세개의 미션 중 하나를 골라 전체 미션을 확인해보세요!", color=discord.Color.blue())
     for idx, preview in enumerate(mission_previews, start=1):
@@ -205,7 +205,7 @@ async def mission(ctx):
     try:
         reaction, _ = await bot.wait_for("reaction_add", timeout=60.0, check=check)
     except asyncio.TimeoutError:
-        await ctx.send("No reaction added within 60 seconds. Mission selection timed out.", delete_after=10)
+        await ctx.send("1분내에 선택하지 않아 미션선택이 취소됩니다", delete_after=10)
     else:
         selected_mission = ""
         if str(reaction.emoji) == "1️⃣":
