@@ -366,16 +366,16 @@ async def buy(ctx, item_number: int):
 async def mission(ctx):
     # Create a dictionary where key is a mission and value is the difficulty level
     missions = {
-        "Download the first day collection of all lectures on the Study Mini app, study the first day of the language you want to learn, and then authenticate": "★★★",
-        "Mission 2: Example mission text 2": "★",
-        "Mission 3: Example mission text 3": "★★★★",
-        "Mission 4: Example mission text 4": "★★★★★",
-        "Mission 5: Example mission text 5": "★★",
-        "Mission 6: Example mission text 6": "★★★★",
-        "Mission 7: Example mission text 7": "★★★★★",
-        "Mission 8: Example mission text 8": "★★★",
-        "Mission 9: Example mission text 9": "★",
-        "Mission 10: Example mission text 10": "★★",
+        "스터디미니 앱에 전체 강의 1일차 모음을 다운로드 후 학습해보고 싶은 언어 1일차 학습 후 인증하기": "★★★",
+        "가장 가보고 싶은 도시와 왜 가고 싶은지 본인이 학습하는 언어로 써서 공유하기": "★★★",
+        "오늘 배운 단어/문법으로 새로운 문장 세개 만들어보기": "★★",
+        "본인이 학습하는 언어의 가장 큰 포털 사이트 방문해서 메인페이지 캡쳐해보기": "★★",
+        "본인이 학습하는 언어로 된 트위터 / 인스타 등 sns 내용 해석해보기": "★★★",
+        "ChatGPT로 간단한(10단어) 단어장 만들어 공유하기 | 예시 프롬프트 : ": "★★★★",
+        "오늘 학습한 혹은 써보고 싶은 문장 세 번 써서 공유하기": "★",
+        "오늘 학습한 혹은 써보고 싶은 문장  다섯 번 써서 공유하기": "★★",
+        "본인이 학습하는 언어로 된 기사 한 번 읽어보고 공유하기(기사 내용이나 기사 전문)": "★★★",
+        "외국어로 된 노래 가사 한 줄 번역해보기": "★★★",
     }
 
     # Randomly select three missions
