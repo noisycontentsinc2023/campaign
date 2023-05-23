@@ -444,5 +444,17 @@ async def mission(ctx):
         embed.add_field(name="미션", value=selected_mission[0], inline=False)
         embed.add_field(name="난이도", value=selected_mission[1], inline=True)
         await ctx.send(embed=embed)
-        
+
+@bot.command(name='포인트')
+async def points(ctx):
+    sheet8, _ = await get_sheet8()
+    cell = await find_user(ctx.author, sheet8)
+    if cell is None:
+        await ctx.send("공부해요 미니상점에 참여중인 멤버가 아닙니다", ephemeral=True)
+        return
+
+    user_points = (await sheet8.cell(cell.row, 2)).value
+    embed = discord.Embed(title="누적 포인트", description=f"{ctx.author.mention}님의 누적 포인트는 {user_points} 입니다")
+    msg = await ctx.send(embed=embed)
+    await msg.delete(delay=60)
 bot.run(TOKEN)
