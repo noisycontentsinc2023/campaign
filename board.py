@@ -380,11 +380,12 @@ async def mission(ctx):
 
     # Randomly select three missions
     selected_missions = random.sample(list(missions.items()), 3)
-    mission_previews = [f"{mission[:10]}... Difficulty: {difficulty}" for mission, difficulty in selected_missions]
 
     embed = discord.Embed(title="Today's Mission", description=f"{ctx.author.mention}', choose one of the three missions below to see the entire mission!", color=discord.Color.blue())
-    for idx, preview in enumerate(mission_previews, start=1):
-        embed.add_field(name=f"Mission {idx}", value=preview, inline=False)
+    for idx, (mission, difficulty) in enumerate(selected_missions, start=1):
+        mission_preview = f"{mission[:50]}..." if len(mission) > 50 else mission
+        embed.add_field(name=f"Mission {idx}", value=mission_preview, inline=False)
+        embed.add_field(name="Difficulty", value=difficulty, inline=True)
 
     message = await ctx.send(embed=embed)
 
@@ -411,9 +412,11 @@ async def mission(ctx):
         # Create an embed message for the selected mission
         embed = discord.Embed(
             title="Selected Mission",
-            description=f"{ctx.author.mention}, the mission you have selected is as follows:\n{selected_mission[0]} Difficulty: {selected_mission[1]}",
+            description=f"{ctx.author.mention}, the mission you have selected is as follows:",
             color=discord.Color.blue()
         )
+        embed.add_field(name="미션", value=selected_mission[0], inline=False)
+        embed.add_field(name="난이도", value=selected_mission[1], inline=True)
         await ctx.send(embed=embed)
         
 bot.run(TOKEN)
