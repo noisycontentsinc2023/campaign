@@ -383,11 +383,11 @@ async def mission(ctx):
     selected_missions = random.sample(list(missions.items()), 3)
     mission_previews = [mission[:10] + "..." for mission, difficulty in selected_missions]
 
-    embed = discord.Embed(title="오늘의 미션입니다", description=f"{ctx.author.mention}', 세 개의 미션 중 하나를 골라 전체 텍스트를 확인하세요!", color=discord.Color.blue())
+    embed = discord.Embed(title="오늘의 미션을 선택해주세요", description=f"{ctx.author.mention}님 세 개의 미션 중 하나를 골라 전체 텍스트를 확인하세요!", color=discord.Color.blue())
     for idx, preview in enumerate(mission_previews, start=1):
         embed.add_field(name=f"미션 {idx}", value=preview, inline=False)
 
-    message = await ctx.send(embed=embed)
+    message = await ctx.send(embed=embed, delete_after=60)
 
     # Add reactions to the message
     for emoji in ["1️⃣", "2️⃣", "3️⃣"]:
@@ -397,9 +397,9 @@ async def mission(ctx):
         return user == ctx.author and str(reaction.emoji) in ["1️⃣", "2️⃣", "3️⃣"]
 
     try:
-        reaction, _ = await bot.wait_for("reaction_add", timeout=55.0, check=check)
+        reaction, _ = await bot.wait_for("reaction_add", timeout=60.0, check=check)
     except asyncio.TimeoutError:
-        await ctx.send("Mission selection was canceled because you did not select within 1 minute", delete_after=10)
+        await ctx.send("1분안에 미션을 선택하지 않아 미션 선택이 종료됩니다", delete_after=10)
     else:
         selected_mission = ""
         if str(reaction.emoji) == "1️⃣":
