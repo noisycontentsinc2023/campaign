@@ -379,14 +379,15 @@ async def mission(ctx):
     }
 
     # Randomly select three missions
-    selected_missions = random.sample(missions, 3)
-    mission_previews = [mission[:10] + "..." for mission in selected_missions]
+    # Randomly select three missions
+    selected_missions = random.sample(list(missions.items()), 3)
+    mission_previews = [mission[:10] + "..." for mission, difficulty in selected_missions]
 
-    embed = discord.Embed(title="오늘의 미션입니다!", description=f"{ctx.author.mention}', 세개의 미션 중 하나의 미션을 골라 전체 텍스트를 확인하세요", color=discord.Color. blue())
+    embed = discord.Embed(title="오늘의 미션입니다", description=f"{ctx.author.mention}', 세 개의 미션 중 하나를 골라 전체 텍스트를 확인하세요!", color=discord.Color.blue())
     for idx, preview in enumerate(mission_previews, start=1):
         embed.add_field(name=f"Mission {idx}", value=preview, inline=False)
 
-    message = await ctx. send(embed=embed)
+    message = await ctx.send(embed=embed)
 
     # Add reactions to the message
     for emoji in ["1️⃣", "2️⃣", "3️⃣"]:
@@ -414,8 +415,8 @@ async def mission(ctx):
             description=f"{ctx.author.mention}, the mission you have selected is as follows:",
             color=discord.Color.blue()
         )
-        embed.add_field(name="미션", value=selected_mission[0], inline=False)
-        embed.add_field(name="난이도", value=selected_mission[1], inline=True)
+        embed.add_field(name="Mission", value=selected_mission[0], inline=False)
+        embed.add_field(name="Difficulty", value=selected_mission[1], inline=True)
         await ctx.send(embed=embed)
         
 bot.run(TOKEN)
