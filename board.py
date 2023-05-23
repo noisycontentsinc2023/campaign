@@ -385,7 +385,7 @@ async def mission(ctx):
 
     embed = discord.Embed(title="오늘의 미션입니다", description=f"{ctx.author.mention}', 세 개의 미션 중 하나를 골라 전체 텍스트를 확인하세요!", color=discord.Color.blue())
     for idx, preview in enumerate(mission_previews, start=1):
-        embed.add_field(name=f"Mission {idx}", value=preview, inline=False)
+        embed.add_field(name=f"미션 {idx}", value=preview, inline=False)
 
     message = await ctx.send(embed=embed)
 
@@ -411,12 +411,12 @@ async def mission(ctx):
 
         # Create an embed message for the selected mission
         embed = discord.Embed(
-            title="Selected Mission",
-            description=f"{ctx.author.mention}, the mission you have selected is as follows:",
+            title="오늘의 미션",
+            description=f"{ctx.author.mention}님이 선택하신 미션입니다!",
             color=discord.Color.blue()
         )
-        embed.add_field(name="Mission", value=selected_mission[0], inline=False)
-        embed.add_field(name="Difficulty", value=selected_mission[1], inline=True)
+        embed.add_field(name="미션", value=selected_mission[0], inline=False)
+        embed.add_field(name="난이도", value=selected_mission[1], inline=True)
         await ctx.send(embed=embed)
         
 bot.run(TOKEN)
