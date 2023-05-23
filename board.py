@@ -170,59 +170,6 @@ async def world(ctx):
     view = DiceRollView(ctx, sheet7, message)  # 메시지를 전달
     await message.edit(embed=embed, view=view) 
 
-@bot.command(name="미션")
-async def mission(ctx):
-    missions = [
-        "스터디미니 앱에 전체 강의 1일차 모음을 다운로드 후 학습해보고 싶은 언어 1일차 학습 후 인증하기",
-        "Mission 2: Example mission text 2",
-        "Mission 3: Example mission text 3",
-        "Mission 4: Example mission text 4",
-        "Mission 5: Example mission text 5",
-        "Mission 6: Example mission text 6",
-        "Mission 7: Example mission text 7",
-        "Mission 8: Example mission text 8",
-        "Mission 9: Example mission text 9",
-        "Mission 10: Example mission text 10",
-    ]
-
-    # Randomly select three missions
-    selected_missions = random.sample(missions, 3)
-    mission_previews = [mission[:10] + "..." for mission in selected_missions]
-
-    embed = discord.Embed(title="오늘의 미션", description=f"{ctx.author.mention}'님, 아래 세개의 미션 중 하나를 골라 전체 미션을 확인해보세요!", color=discord.Color.blue())
-    for idx, preview in enumerate(mission_previews, start=1):
-        embed.add_field(name=f"Mission {idx}", value=preview, inline=False)
-
-    message = await ctx.send(embed=embed)
-    
-    # Add reactions to the message
-    for emoji in ["1️⃣", "2️⃣", "3️⃣"]:
-        await message.add_reaction(emoji)
-
-    def check(reaction, user):
-        return user == ctx.author and str(reaction.emoji) in ["1️⃣", "2️⃣", "3️⃣"]
-
-    try:
-        reaction, _ = await bot.wait_for("reaction_add", timeout=55.0, check=check)
-    except asyncio.TimeoutError:
-        await ctx.send("1분내에 선택하지 않아 미션선택이 취소 됐습니다", delete_after=10)
-    else:
-        selected_mission = ""
-        if str(reaction.emoji) == "1️⃣":
-            selected_mission = selected_missions[0]
-        elif str(reaction.emoji) == "2️⃣":
-            selected_mission = selected_missions[1]
-        elif str(reaction.emoji) == "3️⃣":
-            selected_mission = selected_missions[2]
-
-        # Create an embed message for the selected mission
-        embed = discord.Embed(
-            title="Selected Mission",
-            description=f"{ctx.author.mention}님, 선택하신 미션은 아래와 같습니다:\n{selected_mission}",
-            color=discord.Color.blue()
-        )
-        await ctx.send(embed=embed)
-
 #---------------------------------------------------------------------------#
 
 async def get_sheet8():
@@ -414,5 +361,59 @@ async def buy(ctx, item_number: int):
             await ctx.send("구매가 취소되었습니다", ephemeral=True)
     
     await message.delete(delay=180)
-            
+
+@bot.command(name="미션")
+async def mission(ctx):
+    # Create a dictionary where key is a mission and value is the difficulty level
+    missions = {
+        "Download the first day collection of all lectures on the Study Mini app, study the first day of the language you want to learn, and then authenticate": "★★★",
+        "Mission 2: Example mission text 2": "★",
+        "Mission 3: Example mission text 3": "★★★★",
+        "Mission 4: Example mission text 4": "★★★★★",
+        "Mission 5: Example mission text 5": "★★",
+        "Mission 6: Example mission text 6": "★★★★",
+        "Mission 7: Example mission text 7": "★★★★★",
+        "Mission 8: Example mission text 8": "★★★",
+        "Mission 9: Example mission text 9": "★",
+        "Mission 10: Example mission text 10": "★★",
+    }
+
+    # Randomly select three missions
+    selected_missions = random.sample(list(missions.items()), 3)
+    mission_previews = [f"{mission[:10]}... Difficulty: {difficulty}" for mission, difficulty in selected_missions]
+
+    embed = discord.Embed(title="Today's Mission", description=f"{ctx.author.mention}', choose one of the three missions below to see the entire mission!", color=discord.Color.blue())
+    for idx, preview in enumerate(mission_previews, start=1):
+        embed.add_field(name=f"Mission {idx}", value=preview, inline=False)
+
+    message = await ctx.send(embed=embed)
+
+    # Add reactions to the message
+    for emoji in ["1️⃣", "2️⃣", "3️⃣"]:
+        await message.add_reaction(emoji)
+
+    def check(reaction, user):
+        return user == ctx.author and str(reaction.emoji) in ["1️⃣", "2️⃣", "3️⃣"]
+
+    try:
+        reaction, _ = await bot.wait_for("reaction_add", timeout=55.0, check=check)
+    except asyncio.TimeoutError:
+        await ctx.send("Mission selection was canceled because you did not select within 1 minute", delete_after=10)
+    else:
+        selected_mission = ""
+        if str(reaction.emoji) == "1️⃣":
+            selected_mission = selected_missions[0]
+        elif str(reaction.emoji) == "2️⃣":
+            selected_mission = selected_missions[1]
+        elif str(reaction.emoji) == "3️⃣":
+            selected_mission = selected_missions[2]
+
+        # Create an embed message for the selected mission
+        embed = discord.Embed(
+            title="Selected Mission",
+            description=f"{ctx.author.mention}, the mission you have selected is as follows:\n{selected_mission[0]} Difficulty: {selected_mission[1]}",
+            color=discord.Color.blue()
+        )
+        await ctx.send(embed=embed)
+        
 bot.run(TOKEN)
