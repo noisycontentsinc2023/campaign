@@ -496,7 +496,7 @@ async def mission(ctx):
     selected_missions = random.sample(list(missions.items()), 3)
     mission_previews = [mission[:10] + "..." for mission, difficulty in selected_missions]
 
-    embed = discord.Embed(title="오늘의 미션을 선택해주세요", description=f"{ctx.author.mention}님 세 개의 미션 중 하나를 골라 전체 텍스트를 확인하세요!", color=discord.Color.blue())
+    embed = discord.Embed(title="오늘의 미션은 무엇일까요?", description=f"{ctx.author.mention}님 원하는 미션을 골라 인증하고 포인트를 획득하세요!\n 미션 수행 포인트는 5점입니다", color=discord.Color.blue())
     for idx, preview in enumerate(mission_previews, start=1):
         embed.add_field(name=f"미션 {idx}", value=preview, inline=False)
 
