@@ -227,6 +227,11 @@ class AuthButton(discord.ui.Button):
 
         self.handled_users.add(interaction.user.id)  # Remember user as handled
 
+        # If the user who interacted is the same as the one who invoked the command, send them an ephemeral message
+        if interaction.user == self.ctx.author:
+            await interaction.response.send_message("본인의 인증은 직접할 수 없습니다", ephemeral=True)
+            return
+
         sheet8, rows = await get_sheet8()
         
         if interaction.user == self.ctx.author:
