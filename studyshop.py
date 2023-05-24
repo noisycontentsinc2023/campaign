@@ -278,7 +278,55 @@ async def Authentication(ctx):
 
     await bot.wait_for("interaction", check=check)
 
-    
+class InstaAuthButton(discord.ui.Button):
+    def __init__(self, ctx, user):
+        super().__init__(style=discord.ButtonStyle.green, label="확인")
+        self.ctx = ctx
+        self.user = user
+        self.stop_loop = False
+        self.handled_users = set()  # Store user IDs who have already interacted
+
+    async def callback(self, interaction: discord.Interaction):
+        if interaction.user.id in self.handled_users:
+            return  # Ignore if user has already interacted
+
+        # Make sure only an admin can interact with this button
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("관리자만 해당 버튼을 클릭할 수 있어요", ephemeral=True)
+            return
+
+        self.handled_users.add(interaction.user.id)  # Remember user as handled
+
+        sheet8, rows = await get_sheet8()
+
+        existing_users = await sheet8.col_values(1)
+        if str(self.user) not in existing_users:
+            empty_row = len(existing_users) + 1
+            await sheet8.update_cell(empty_row, 1, str(self.user))
+            await sheet8.update_cell(empty_row, 2, "10")  # Update B column with +10
+        else:
+            index = existing_users.index(str(self.user)) + 1
+            count_cell = await sheet8.cell(index, 2)  # Get the cell in column B
+            current_count = int(count_cell.value or "0")  # If cell is empty, treat as 0
+            await sheet8.update_cell(index, 2, str(current_count + 10))  # Increment the count by 10
+        self.stop_loop = True
+        await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{self.ctx.author.mention}님 sns게시글이 정상적으로 확인되어 10 포인트가 누적됐어요!"), view=None)
+
+@bot.command(name='인스타인증')
+async def InstaAuthentication(ctx):
+    embed = discord.Embed(title="확인요청", description=f"{ctx.author.mention}님의 sns 게시글 확인 요청입니다")
+    view = discord.ui.View()
+    button = InstaAuthButton(ctx, ctx.author)
+    view.add_item(button)
+    view.add_item(CancelButton(ctx))
+    msg = await ctx.send(embed=embed, view=view)
+
+    asyncio.create_task(update_embed(ctx, msg))
+
+    def check(interaction: discord.Interaction):
+        return interaction.message.id == msg.id and interaction.data.get("component_type") == discord.ComponentType.button.value
+
+    await bot.wait_for("interaction", check=check)    
 
 
 items = [
