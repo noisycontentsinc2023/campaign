@@ -290,7 +290,7 @@ async def update_embed_insta(ctx, msg):
             view.add_item(button)
             view.add_item(cancel)
 
-            embed = discord.Embed(title="확인요청", description=f"{ctx.author.mention}님 sns 게시물 확인 요청입니다")  # We no longer use 'date' here
+            embed = discord.Embed(title="확인요청", description=f"{ctx.author.mention}님의 sns 게시물 확인 요청입니다")  # We no longer use 'date' here
             await msg.edit(embed=embed, view=view)
             await asyncio.sleep(60)
         except discord.errors.NotFound:
@@ -328,7 +328,7 @@ class InstaAuthButton(discord.ui.Button):
             current_count = int(count_cell.value or "0")  # If cell is empty, treat as 0
             await sheet8.update_cell(index, 2, str(current_count + 10))  # Increment the count by 10
         self.stop_loop = True
-        await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{self.ctx.author.mention}님 sns게시글이 정상적으로 확인되어 10 포인트가 누적됐어요!"), view=None)
+        await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{self.ctx.author.mention}님의 sns게시글이 정상적으로 확인되어 10 포인트가 누적됐어요!"), view=None)
 
 @bot.command(name='인스타인증')
 async def InstaAuthentication(ctx):
