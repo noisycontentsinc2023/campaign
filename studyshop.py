@@ -278,6 +278,24 @@ async def Authentication(ctx):
 
     await bot.wait_for("interaction", check=check)
 
+async def update_embed_insta(ctx, msg):
+    button = InstaAuthButton(ctx, ctx.author)  # We no longer pass 'date' here
+    cancel = CancelButton(ctx)
+    while True:
+        try:
+            if button.stop_loop or cancel.stop_loop:
+                break
+
+            view = discord.ui.View(timeout=None)
+            view.add_item(button)
+            view.add_item(cancel)
+
+            embed = discord.Embed(title="확인요청", description=f"{ctx.author.mention}님 sns 게시물 확인 요청입니다")  # We no longer use 'date' here
+            await msg.edit(embed=embed, view=view)
+            await asyncio.sleep(60)
+        except discord.errors.NotFound:
+            break
+            
 class InstaAuthButton(discord.ui.Button):
     def __init__(self, ctx, user):
         super().__init__(style=discord.ButtonStyle.green, label="확인")
@@ -321,7 +339,7 @@ async def InstaAuthentication(ctx):
     view.add_item(CancelButton(ctx))
     msg = await ctx.send(embed=embed, view=view)
 
-    asyncio.create_task(update_embed(ctx, msg))
+    asyncio.create_task(update_embed_insta(ctx, msg))
 
     def check(interaction: discord.Interaction):
         return interaction.message.id == msg.id and interaction.data.get("component_type") == discord.ComponentType.button.value
