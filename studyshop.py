@@ -197,6 +197,22 @@ async def update_count(sheet8, user):
     except:
         return False
 
+@bot.command(name='등록')
+async def register(ctx):
+    username = f"{ctx.author.name}#{ctx.author.discriminator}"
+    sheet8, rows = await get_sheet8()
+
+    existing_users = await sheet8.col_values(1)  # Get list of existing users
+    if username in existing_users:  # Check if user is already registered
+        embed = discord.Embed(description=f"{ctx.author.mention}님 이미 등록되셨습니다!")
+        await ctx.send(embed=embed)
+    else:
+        empty_row = len(existing_users) + 1  # Find next empty row
+        await sheet8.update_cell(empty_row, 1, username)  # Update A column
+        await sheet8.update_cell(empty_row, 2, "0")  # Update B column
+        embed = discord.Embed(description=f"{ctx.author.mention}님 성공적으로 등록되었습니다!")
+        await ctx.send(embed=embed)
+        
 class AuthButton(discord.ui.Button):
     def __init__(self, ctx, user):
         super().__init__(style=discord.ButtonStyle.green, label="확인")
