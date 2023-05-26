@@ -174,7 +174,13 @@ async def update_embed(ctx, msg):
             
 @bot.command(name='미션인증')
 async def Authentication(ctx):
-
+    target_channel_id = 1110047762185195551
+    
+    # If the command is not used in the target channel, ignore it
+    if ctx.channel.id != target_channel_id:
+        await ctx.send("이 명령어는 <#1110047762185195551>에서만 사용 가능해요")
+        return
+      
     embed = discord.Embed(title="인증요청", description=f"{ctx.author.mention}님의 미션인증 요청입니다")
     view = discord.ui.View()
     button = AuthButton(ctx, ctx.author)
@@ -243,6 +249,13 @@ class InstaAuthButton(discord.ui.Button):
 
 @bot.command(name='인스타인증')
 async def InstaAuthentication(ctx):
+    target_channel_id = 1110047762185195551
+    
+    # If the command is not used in the target channel, ignore it
+    if ctx.channel.id != target_channel_id:
+        await ctx.send("이 명령어는 <#1110047762185195551>에서만 사용 가능해요")
+        return
+      
     embed = discord.Embed(title="확인요청", description=f"{ctx.author.mention}님의 sns 게시물 확인 요청입니다")
     view = discord.ui.View()
     button = InstaAuthButton(ctx, ctx.author)
@@ -282,6 +295,13 @@ async def shop(ctx):
 
 @bot.command(name='구매')
 async def buy(ctx, item_number: int):
+    target_channel_id = 1110816770450796625
+    
+    # If the command is not used in the target channel, ignore it
+    if ctx.channel.id != target_channel_id:
+        await ctx.send("이 명령어는 <#1110816770450796625>에서만 사용 가능해요")
+        return
+      
     item = items[item_number]
 
     # Get user points from Google Sheets
