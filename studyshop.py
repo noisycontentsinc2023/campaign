@@ -54,6 +54,17 @@ async def get_sheet8():
     sheet8 = await spreadsheet.worksheet('미니상점')
     rows = await sheet8.get_all_values()
     return sheet8, rows
+
+async def find_user(user, sheet8):
+    cell = None
+    try:
+        username_with_discriminator = f'{user.name}#{user.discriminator}'
+        cells = await sheet8.findall(username_with_discriminator)
+        if cells:
+            cell = cells[0]
+    except gspread_asyncio.exceptions.APIError as e:  # Update the exception to gspread_asyncio
+        print(f'find_user error: {e}')
+    return cell
   
 async def update_count(sheet8, user):
     existing_users = await sheet8.col_values(1)
