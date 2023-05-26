@@ -95,6 +95,14 @@ async def register(ctx):
         embed = discord.Embed(description=f"{ctx.author.mention}님 성공적으로 등록되었습니다!")
         await ctx.send(embed=embed)
         
+        role_id = 1107911997116399616  # Put the ID of the role you want to assign here
+        role = discord.utils.get(ctx.guild.roles, id=role_id)
+
+        if role is not None:
+            await ctx.author.add_roles(role)
+        else:
+            print(f"역할 아이디 {role_id} 를 찾을 수 없습니다")
+        
 class AuthButton(discord.ui.Button):
     def __init__(self, ctx, user):
         super().__init__(style=discord.ButtonStyle.green, label="확인")
