@@ -74,6 +74,13 @@ async def update_count(sheet8, user):
 
 @bot.command(name='등록')
 async def register(ctx):
+    target_channel_id = 1110047258948415498
+    
+    # If the command is not used in the target channel, ignore it
+    if ctx.channel.id != target_channel_id:
+        await ctx.send("이 명령어는 <#1110047258948415498>에서만 사용 가능해요")
+        return
+      
     username = f"{ctx.author.name}#{ctx.author.discriminator}"
     sheet8, rows = await get_sheet8()
 
@@ -244,24 +251,22 @@ async def InstaAuthentication(ctx):
 
 
 items = [
-    {"name": "0. 팬더단", "role_id": "1108296480399302666", "cost": 20},
-    {"name": "1. 스터디플래너-영", "role_id": "1108296512015958086", "cost": 30},
-    {"name": "2. 스터디플래너-일", "role_id": "1108296523323813978", "cost": 30},
-    {"name": "3. 스터디플래너-스", "role_id": "1108296601526612060", "cost": 30},
-    {"name": "4. 스터디플래너-프", "role_id": "1108296604923998299", "cost": 30},
-    {"name": "5. 스터디플래너-중", "role_id": "1108296607088263202", "cost": 30},
-    {"name": "6. 스터디플래너-독", "role_id": "1108296609390923787", "cost": 30},
-    {"name": "7. 10% 쿠폰", "role_id": "1108296611114799196", "cost": 30},
+    {"name": "0. 스터디플래너-영", "role_id": "1107912106201841735", "cost": 10},
+    {"name": "1. 스터디플래너-일", "role_id": "1107912106201841735", "cost": 10},
+    {"name": "2. 스터디플래너-스", "role_id": "1107912106201841735", "cost": 10},
+    {"name": "3. 스터디플래너-프", "role_id": "1110829125012295731", "cost": 10},
+    {"name": "4. 스터디플래너-중", "role_id": "1111467918425862185", "cost": 10},
+    {"name": "5. 스터디플래너-독", "role_id": "1110829239361605752", "cost": 10},
+    {"name": "6. 커스텀 역할", "role_id": "1110830477465620530", "cost": 15},
+    {"name": "7. 5% 쿠폰", "role_id": "1108296611114799196", "cost": 20},
     {"name": "8. VOD 한 건 무료", "role_id": "1108296777393786890", "cost": 30},
-    {"name": "9. 훈트막스 액자", "role_id": "1108586104187277313", "cost": 30},
-    {"name": "10. 훈트막스", "role_id": "1108296850244640769", "cost": 30},
+    {"name": "9. 훈트막스 액자", "role_id": "1108586104187277313", "cost": 80},
+    {"name": "10. 훈트막스", "role_id": "1108296850244640769", "cost": 100},
 ]
-
-1107916119957844038
 
 @bot.command(name='상점')
 async def shop(ctx):
-    embed = discord.Embed(title="포인트상점에 오신걸 환영합니다!", description=f"{ctx.author.mention}님 원하시는 품목을 선택해주세요!")
+    embed = discord.Embed(title="미니상점에 오신걸 환영합니다!", description=f"{ctx.author.mention}님 원하시는 품목을 선택해주세요!")
     for item in items:
         embed.add_field(name=item['name'], value=f"Cost: {item['cost']}", inline=False)
     message = await ctx.send(embed=embed)
@@ -289,11 +294,11 @@ async def buy(ctx, item_number: int):
     
     # Check if user already has this role
     if role in ctx.author.roles:
-        await ctx.send("You have already purchased this item!", ephemeral=True)
+        await ctx.send("해당 품목은 이미 구매하셨어요!", ephemeral=True)
         return
       
     # 구매시 기본 획득 롤
-    additional_role = discord.utils.get(ctx.guild.roles, id=1107916119957844038)
+    additional_role = discord.utils.get(ctx.guild.roles, id=1107912106201841735)
     
     # Confirm purchase
     message = await ctx.send(f"{role.mention}를(을) 구매하기 위해서는 {item['cost']} 포인트가 필요합니다 . {item['cost']} 포인트를 소모해서 {role.mention}를(을) 구매하시겠어요?", ephemeral=True)
@@ -309,7 +314,7 @@ async def buy(ctx, item_number: int):
     try:
         reaction, user = await bot.wait_for('reaction_add', timeout=180.0, check=check)
     except asyncio.TimeoutError:
-        await ctx.send('No response...', ephemeral=True)
+        await ctx.send('3분간 결정하시지 않아 메시지가 삭제됩니다', ephemeral=True)
     else:
         if str(reaction.emoji) == '✅':
             # Deduct points and assign role
@@ -387,7 +392,7 @@ async def mission(ctx):
     try:
         reaction, _ = await bot.wait_for("reaction_add", timeout=60.0, check=check)
     except asyncio.TimeoutError:
-        await ctx.send("1분안에 미션을 선택하지 않아 미션 선택이 종료됐습니다", delete_after=10)
+        await ctx.send("1분 안에 미션을 선택하지 않아 미션 선택이 종료됐습니다", delete_after=10)
     else:
         selected_mission = ""
         if str(reaction.emoji) == "1️⃣":
@@ -419,4 +424,5 @@ async def points(ctx):
     embed = discord.Embed(title="누적 포인트", description=f"{ctx.author.mention}님의 누적 포인트는 {user_points} 입니다")
     msg = await ctx.send(embed=embed)
     await msg.delete(delay=60)
+    
 bot.run(TOKEN)
