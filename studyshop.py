@@ -115,6 +115,45 @@ async def register(ctx):
         else:
             print(f"역할 아이디 {role_id} 를 찾을 수 없습니다")
         
+            
+command_usage = defaultdict(int)
+
+@bot.command(name='미션인증')
+async def Authentication(ctx):
+    target_channel_id = 1110047762185195551
+
+    if ctx.channel.id != target_channel_id:
+        await ctx.send("이 명령어는 <#1110047762185195551>에서만 사용 가능해요")
+        return
+
+    # Track the command usage
+    KST = pytz.timezone('Asia/Seoul')  # Define the KST timezone
+    today = datetime.now(KST).strftime('%Y-%m-%d')  # Get the current date in 'YYYY-MM-DD' format in KST
+    user_id_date = (ctx.author.id, today)
+    
+    # Check if the command usage limit is reached
+    if command_usage[user_id_date] >= 3:
+        await ctx.send("하루 인증 횟수가 3회를 초과하였습니다. 내일 다시 시도해주세요.")
+        return
+
+    command_usage[user_id_date] += 1  # Increment the command usage count
+
+    embed = discord.Embed(title="인증요청", description=f"{ctx.author.mention}님의 미션인증 요청입니다")
+    # Add command usage count in the footer
+    embed.set_footer(text=f"오늘 남은 인증 횟수: {3 - command_usage[user_id_date]}")
+    view = discord.ui.View()
+    button = AuthButton(ctx, ctx.author)
+    view.add_item(button)
+    view.add_item(CancelButton(ctx))
+    msg = await ctx.send(embed=embed, view=view)
+    
+    asyncio.create_task(update_embed(ctx, msg))
+
+    def check(interaction: discord.Interaction):
+        return interaction.message.id == msg.id and interaction.data.get("component_type") == discord.ComponentType.button.value
+
+    await bot.wait_for("interaction", check=check)
+    
 class AuthButton(discord.ui.Button):
     def __init__(self, ctx, user):
         super().__init__(style=discord.ButtonStyle.green, label="확인")
@@ -179,49 +218,11 @@ async def update_embed(ctx, msg):
             view.add_item(cancel)
 
             embed = discord.Embed(title="인증요청", description=f"{ctx.author.mention}님의 미션인증 요청입니다")  # We no longer use 'date' here
+            embed.set_footer(text=f"오늘 남은 인증 횟수: {3 - command_usage[user_id_date]}")
             await msg.edit(embed=embed, view=view)
             await asyncio.sleep(60)
         except discord.errors.NotFound:
-            break
-            
-command_usage = defaultdict(int)
-
-@bot.command(name='미션인증')
-async def Authentication(ctx):
-    target_channel_id = 1110047762185195551
-
-    if ctx.channel.id != target_channel_id:
-        await ctx.send("이 명령어는 <#1110047762185195551>에서만 사용 가능해요")
-        return
-
-    # Track the command usage
-    KST = pytz.timezone('Asia/Seoul')  # Define the KST timezone
-    today = datetime.now(KST).strftime('%Y-%m-%d')  # Get the current date in 'YYYY-MM-DD' format in KST
-    user_id_date = (ctx.author.id, today)
-    
-    # Check if the command usage limit is reached
-    if command_usage[user_id_date] >= 3:
-        await ctx.send("하루 인증 횟수가 3회를 초과하였습니다. 내일 다시 시도해주세요.")
-        return
-
-    command_usage[user_id_date] += 1  # Increment the command usage count
-
-    embed = discord.Embed(title="인증요청", description=f"{ctx.author.mention}님의 미션인증 요청입니다")
-    # Add command usage count in the footer
-    embed.set_footer(text=f"오늘 남은 인증 횟수: {3 - command_usage[user_id_date]}")
-    view = discord.ui.View()
-    button = AuthButton(ctx, ctx.author)
-    view.add_item(button)
-    view.add_item(CancelButton(ctx))
-    msg = await ctx.send(embed=embed, view=view)
-    
-    asyncio.create_task(update_embed(ctx, msg))
-
-    def check(interaction: discord.Interaction):
-        return interaction.message.id == msg.id and interaction.data.get("component_type") == discord.ComponentType.button.value
-
-    await bot.wait_for("interaction", check=check)
-    
+            break    
 async def update_embed_insta(ctx, msg):
     button = InstaAuthButton(ctx, ctx.author)  # We no longer pass 'date' here
     cancel = CancelButton(ctx)
