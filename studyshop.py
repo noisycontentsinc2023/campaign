@@ -295,11 +295,11 @@ async def shop(ctx):
 
 @bot.command(name='구매')
 async def buy(ctx, item_number: int):
-    target_channel_id = 1110816770450796625
+    target_channel_id = 1111474951606767697
     
     # If the command is not used in the target channel, ignore it
     if ctx.channel.id != target_channel_id:
-        await ctx.send("이 명령어는 <#1110816770450796625>에서만 사용 가능해요")
+        await ctx.send("이 명령어는 <#1111474951606767697>에서만 사용 가능해요")
         return
       
     item = items[item_number]
