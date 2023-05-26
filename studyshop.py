@@ -88,7 +88,7 @@ async def update_count(sheet8, user):
 async def register(ctx):
     target_channel_id = 1110047258948415498
     
-    # If the command is not used in the target channel, ignore it
+    # 해당 채널이 아니라면 무시 
     if ctx.channel.id != target_channel_id:
         await ctx.send("이 명령어는 <#1110047258948415498>에서만 사용 가능해요")
         return
@@ -96,18 +96,18 @@ async def register(ctx):
     username = f"{ctx.author.name}#{ctx.author.discriminator}"
     sheet8, rows = await get_sheet8()
 
-    existing_users = await sheet8.col_values(1)  # Get list of existing users
-    if username in existing_users:  # Check if user is already registered
+    existing_users = await sheet8.col_values(1)  # 리스트 불러오기
+    if username in existing_users:  # 이미 있는지 확인
         embed = discord.Embed(description=f"{ctx.author.mention}님 이미 등록되셨습니다!")
         await ctx.send(embed=embed)
     else:
-        empty_row = len(existing_users) + 1  # Find next empty row
-        await sheet8.update_cell(empty_row, 1, username)  # Update A column
-        await sheet8.update_cell(empty_row, 2, "0")  # Update B column
+        empty_row = len(existing_users) + 1  # 빈 행을 확인 
+        await sheet8.update_cell(empty_row, 1, username)  # 1행에 유저 이름 기입
+        await sheet8.update_cell(empty_row, 2, "0")  # 2행에 0 기입
         embed = discord.Embed(description=f"{ctx.author.mention}님 성공적으로 등록되었습니다!")
         await ctx.send(embed=embed)
         
-        role_id = 1107911997116399616  # Put the ID of the role you want to assign here
+        role_id = 1107911997116399616  # 명령어 입력 시 획득 롤 
         role = discord.utils.get(ctx.guild.roles, id=role_id)
 
         if role is not None:
@@ -223,6 +223,7 @@ async def update_embed(ctx, msg):
             await asyncio.sleep(60)
         except discord.errors.NotFound:
             break    
+            
 async def update_embed_insta(ctx, msg):
     button = InstaAuthButton(ctx, ctx.author)  # We no longer pass 'date' here
     cancel = CancelButton(ctx)
