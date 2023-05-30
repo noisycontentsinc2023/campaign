@@ -186,11 +186,11 @@ class AuthButton(discord.ui.Button):
             index = existing_users.index(str(self.user)) + 1
             count_cell = await sheet8.cell(index, 2)  # Get the cell in column B
             current_count = int(count_cell.value or "0")  # If cell is empty, treat as 0
-            await sheet8.update_cell(index, 2, str(current_count + 5))  # Increment the count
+            await sheet8.update_cell(index, 2, str(current_count + 4))  # Increment the count
         self.stop_loop = True
         success = await update_count(sheet8, interaction.user)
         if success:
-            await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}의 를 인증했습니다🥳\n {self.ctx.author.mention}님, 5 포인트가 누적됐어요!\n{interaction.user.mention}님, 1포인트가 누적됐어요!"), view=None)
+            await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{interaction.user.mention}님이 {self.ctx.author.mention}의 를 인증했습니다🥳\n {self.ctx.author.mention}님, 4 포인트가 누적됐어요!\n{interaction.user.mention}님, 1포인트가 누적됐어요!"), view=None)
 
 class CancelButton(discord.ui.Button):
     def __init__(self, ctx):
@@ -272,9 +272,9 @@ class InstaAuthButton(discord.ui.Button):
             index = existing_users.index(str(self.user)) + 1
             count_cell = await sheet8.cell(index, 2)  # Get the cell in column B
             current_count = int(count_cell.value or "0")  # If cell is empty, treat as 0
-            await sheet8.update_cell(index, 2, str(current_count + 10))  # Increment the count by 10
+            await sheet8.update_cell(index, 2, str(current_count + 8))  # Increment the count by 10
         self.stop_loop = True
-        await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{self.ctx.author.mention}님의 sns게시물이 정상적으로 확인되어 10 포인트가 누적됐어요!"), view=None)
+        await interaction.message.edit(embed=discord.Embed(title="인증완료", description=f"{self.ctx.author.mention}님의 sns게시물이 정상적으로 확인되어 8 포인트가 누적됐어요!"), view=None)
 
 @bot.command(name='인스타인증')
 async def InstaAuthentication(ctx):
@@ -307,11 +307,11 @@ items = [
     {"name": "3. 스터디플래너-프", "role_id": "1110829125012295731", "cost": 10},
     {"name": "4. 스터디플래너-중", "role_id": "1111467918425862185", "cost": 10},
     {"name": "5. 스터디플래너-독", "role_id": "1110829239361605752", "cost": 10},
-    {"name": "6. 커스텀 역할", "role_id": "1110830477465620530", "cost": 15},
-    {"name": "7. 5% 쿠폰", "role_id": "1108296611114799196", "cost": 20},
-    {"name": "8. VOD 한 건 무료", "role_id": "1108296777393786890", "cost": 30},
-    {"name": "9. 훈트막스 액자", "role_id": "1108586104187277313", "cost": 80},
-    {"name": "10. 훈트막스", "role_id": "1108296850244640769", "cost": 100},
+    {"name": "6. 5% 할인 쿠폰", "role_id": "1110829499349745745", "cost": 30},
+    {"name": "7. 훈트막스 액자", "role_id": "1110830522957058080", "cost": 40},
+    {"name": "8. VOD 한 건 무료", "role_id": "1107912792247390269", "cost": 60},
+    {"name": "9. 훈트막스 NFT", "role_id": "1110829744167067749", "cost": 80},
+    {"name": "10. 커스텀 역할", "role_id": "1110830477465620530", "cost": 100},
 ]
 
 @bot.command(name='상점')
