@@ -163,14 +163,14 @@ cooldowns = {}  # 쿨다운 기록
 @bot.command(name='')
 async def RandomMission(ctx):
     user_id = ctx.author.id
-    cooldown_time = 3600  # One hour in seconds
+    cooldown_time = 3600  # 쿨다운 설정
 
     # Check if the user is not in cooldowns or their cooldown has expired
     if user_id not in cooldowns or cooldowns[user_id] < time.time():
         cooldowns[user_id] = time.time() + cooldown_time
 
-        required_role = discord.utils.get(ctx.guild.roles, id=1093781563508015105)
-        allowed_channel_ids = ["1093780375890825246", "922426434633478194", "1057267651405152256"]
+        required_role = discord.utils.get(ctx.guild.roles, id=1093781563508015105) # 명령어를 입력할 수 있는 역할
+        allowed_channel_ids = ["1093780375890825246", "922426434633478194", "1057267651405152256"] # 명령어가 동작하는 채널
         if required_role in ctx.author.roles:
             if str(ctx.channel.id) in allowed_channel_ids:
                 await lottery(ctx)
@@ -183,7 +183,7 @@ async def RandomMission(ctx):
         await asyncio.sleep(cooldown_time)  # Add a delay between command uses
 
     else:
-        # Send the message if the user is still in cooldown
+        # 아직 쿨다운인 경우 출력
         embed = discord.Embed(description="해당 명령어는 한 시간에 한 번만 쓸 수 있어요!", color=0xff0000)
         await ctx.send(embed=embed)
 
