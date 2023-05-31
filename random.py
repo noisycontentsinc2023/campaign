@@ -58,8 +58,8 @@ creds_info = {
 credentials = Credentials.from_service_account_info(creds_info, scopes=scope)
 aio_creds = credentials
 #------------------------------------------------#
-# Set up Google Sheets worksheet
-async def get_sheet3():  # 수정
+# 스프레드 시트 지정
+async def get_sheet3(): 
     client_manager = gspread_asyncio.AsyncioGspreadClientManager(lambda: aio_creds)
     client = await client_manager.authorize()
     spreadsheet = await client.open('서버기록')
@@ -158,7 +158,7 @@ class RandomMissionView(View):
         await self.ctx.invoke(self.ctx.bot.get_command('再次'))
 
 
-cooldowns = {}  # Create a dictionary to store cooldowns
+cooldowns = {}  # 쿨다운 기록
 
 @bot.command(name='')
 async def RandomMission(ctx):
