@@ -390,7 +390,6 @@ async def mission_count(ctx):
     username = str(ctx.message.author)
     sheet3, rows = await get_sheet3()
     
-    # Find the user's row in the Google Sheet
     user_row = None
     for row in await sheet3.get_all_values():
         if username in row:
@@ -403,13 +402,12 @@ async def mission_count(ctx):
         return
 
     user_cell = await sheet3.find(username)
-    count = int((await sheet3.cell(user_cell.row, 9)).value)  # Column I is the 9th column
+    count = int((await sheet3.cell(user_cell.row, 9)).value)  # 해당 username의 I행을 불러옴
 
-    # Send the embed message with the user's authentication count
     embed = discord.Embed(description=f"{ctx.author.mention}님은 {count} 회 인증하셨어요!", color=0x00FF00)
     await ctx.send(embed=embed)
 
-    # Check if the user's count is 6 or 7 and grant the Finisher role
+    # 참여자가 총 7일 중 6회이상 인증하면
     if count in [6, 7]:
         role = discord.utils.get(ctx.guild.roles, id=1093831438475989033)
         await ctx.author.add_roles(role)
